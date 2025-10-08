@@ -18,8 +18,8 @@ const handleSubmit = async () => {
   if (users.some((u) => u.email === form.value.email)) {
     Swal.fire({
       icon: "error",
-      title: "Email has been registered!",
-      text: "Please use another email",
+      title: "Email đã tồn tại!",
+      text: "Vui lòng sử dụng email khác!",
       confirmButtonColor: "#000",
     });
     return;
@@ -32,10 +32,10 @@ const handleSubmit = async () => {
       localStorage.setItem("users", JSON.stringify(users));
       Swal.fire({
         icon: "success",
-        title: "Account created successfully",
-        text: "Your account has been created!",
+        title: "Tạo Tài Khoản Thành Công",
+        text: "Bạn đã đăng ký thành công!",
         showConfirmButton: true,
-        confirmButtonText: "Go to Login",
+        confirmButtonText: "Đến Đăng Nhập",
         confirmButtonColor: "#000",
       }).then(() => {
         window.location.href = "/login";
@@ -53,8 +53,8 @@ const handleSubmit = async () => {
     console.error("Err: ", err);
     Swal.fire({
       icon: "error",
-      title: "Connection error!",
-      text: "Cannot connect to server!",
+      title: "Đăng Ký Thất Bại",
+      text: "Vui lòng thử lại sau!",
       confirmButtonColor: "#000",
     });
   }

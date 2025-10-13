@@ -11,7 +11,9 @@ const user = ref({
   address: '',
   role: '',
   password: '',
-  image: ''
+  image: '',
+  day_of_birth: '',
+  sex: ''
 })
 
 onMounted(() => {
@@ -21,8 +23,8 @@ onMounted(() => {
   } else {
     Swal.fire({
       icon: 'error',
-      title: 'You are not logged in',
-      text: 'Please log in to view personal information!',
+      title: 'Bạn chưa đăng nhập!',
+      text: 'Vui lòng đăng nhập để xem trang cá nhân.',
       confirmButtonColor: '#000'
     }).then(() => {
       window.location.href = '/login'
@@ -37,16 +39,16 @@ const saveChanges = async () => {
 
     Swal.fire({
       icon: 'success',
-      title: 'Update complete!',
-      text: 'Your personal information has been saved.',
+      title: 'Cập nhật thành công!',
+      text: 'Thông tin của bạn đã được cập nhật.',
       confirmButtonColor: '#000'
     })
   } catch (err) {
     console.error('Update error:', err)
     Swal.fire({
       icon: 'error',
-      title: 'Error!',
-      text: 'Unable to update information, please try again.',
+      title: 'Cập nhật thất bại!',
+      text: 'Đã có lỗi xảy ra khi cập nhật thông tin.',
       confirmButtonColor: '#000'
     })
   }
@@ -58,11 +60,11 @@ const saveChanges = async () => {
     <div class="card shadow-lg border-0 rounded-4 p-4 profile-card mx-auto" style="max-width: 800px;">
       <div class="d-flex align-items-center gap-4 flex-wrap">
         <div class="text-center flex-shrink-0">
-          <img :src="user.image || 'https://scontent.fsgn2-11.fna.fbcdn.net/v/t39.30808-6/509356676_2174215323040917_4670940307410756592_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=BK-jYDPlqakQ7kNvwFoAgVt&_nc_oc=AdmggdlmRYPY0G6jRooMmjaXUK5dRuco635txw728_6ARRl23EbR6ljAcO53qzJ0-2PC__plDweaWEdouAbvkEbx&_nc_zt=23&_nc_ht=scontent.fsgn2-11.fna&_nc_gid=vVAuURGA-bV_fyNMkY1X6Q&oh=00_AfcMj9ekjtUuja7kqe6SIyy7egzNgSNakpxiPN-036HtSA&oe=68EB1B7E'" alt="avatar"
+          <img :src="user.image || 'https://scontent.fbmv1-1.fna.fbcdn.net/v/t39.30808-6/509356676_2174215323040917_4670940307410756592_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ELdGa6SjYUwQ7kNvwFxhi4s&_nc_oc=AdmVLX7FI6sSwx0MU5AgO770JlRbJrg_qV28KoyP-hpwFw61iuQM3xU6GA9Ll1duO4k&_nc_zt=23&_nc_ht=scontent.fbmv1-1.fna&_nc_gid=lpkRY_3I7Zq1g728abNm1w&oh=00_AffVpOtMbMq-GKa5zEoHIhGw-071xf-nACy7YIKSdTMwjw&oe=68F293FE'" alt="avatar"
             class="rounded-circle border shadow-sm" width="140" height="140" />
           <div class="mt-3">
             <button class="btn btn-outline-dark btn-sm px-3">
-              <i class="fa fa-camera me-2"></i>Choose image
+              <i class="fa fa-camera me-2"></i>Thay đổi avt
             </button>
           </div>
         </div>
@@ -73,6 +75,7 @@ const saveChanges = async () => {
           <p class="text-muted mb-1"><i class="fa fa-envelope me-2" style="color: greenyellow;"></i>{{ user.email }}</p>
           <p class="text-muted mb-1"><i class="fa fa-phone me-2" style="color: aquamarine;"></i>{{ user.phone }}</p>
           <p class="text-muted mb-1"><i class="fa fa-map-marker me-2" style="color: brown;"></i>{{ user.address }}</p>
+          <p class="text-muted mb-1"><i class="fa-solid fa-person" style="color: pink;"></i>{{ user.day_of_birth ? new Date().getFullYear() - new Date(user.day_of_birth).getFullYear() + ' Tuổi' : '' }}</p>
           <span class="badge bg-success mt-2 text-uppercase">{{ user.role }}</span>
         </div>
       </div>
@@ -98,6 +101,18 @@ const saveChanges = async () => {
           <div class="col-md-6">
             <label class="form-label">Địa Chỉ</label>
             <input v-model="user.address" type="text" class="form-control" placeholder="Nhập địa chỉ" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Năm Sinh</label>
+            <input v-model="user.day_of_birth" type="date" class="form-control" placeholder="Nhập tuổi" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Giới Tính</label>
+            <select v-model="user.sex" class="form-control">
+              <option value="Nam">Nam</option>
+              <option value="Nu">Nữ</option>
+              <option value="BeDe">Bê Đê</option>
+            </select>
           </div>
           <div class="col-md-6">
             <label class="form-label">Mật Khẩu Mới</label>

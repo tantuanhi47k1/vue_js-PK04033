@@ -82,7 +82,7 @@ const handleLogout = () => {
               <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                 style="font-size: 10px;">
-                0
+                2
               </span>
             </div>
           </router-link>

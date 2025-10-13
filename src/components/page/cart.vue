@@ -1,28 +1,38 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { RouterLink } from 'vue-router';
 
 const store = useStore();
+
+onMounted(() => {
+    store.dispatch('cart/fetchCart');
+});
 
 const cart = computed(() => store.getters['cart/cartItems']);
 const subtotal = computed(() => store.getters['cart/cartTotal']);
 const total = computed(() => store.getters['cart/cartTotal']);
 
 const decrease = (item) => {
-    store.dispatch('cart/decreaseProductQuantity', item.id);
+    store.dispatch('cart/decreaseQuantity', item.id);
 };
 
 const increase = (item) => {
-    store.dispatch('cart/increaseProductQuantity', item.id);
+    store.dispatch('cart/increaseQuantity', item.id);
 };
 
 const deleteCartItem = (itemId) => {
-    store.dispatch('cart/deleteProductFromCart', itemId);
+    const isConfirm = confirm('Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?');
+    if (isConfirm) {
+        store.dispatch('cart/deleteCart', itemId);
+    }
 };
 
 const deleteAllCart = () => {
-    store.dispatch('cart/clearCart');
+    const isConfirmAll = confirm('Bạn có chắc chắn muốn xoá tất cả sản phẩm khỏi giỏ hàng?');
+    if (isConfirmAll) {
+        store.dispatch('cart/deleteAllCart');
+    }
 };
 
 </script>
@@ -34,7 +44,7 @@ const deleteAllCart = () => {
         <div class="text-center text-muted py-5" v-if="!cart.length">
             <i class="fa fa-shopping-cart fa-3x mb-3"></i>
             <p>Giỏ hàng của bạn đang trống</p>
-            <RouterLink to="/" class="btn btn-dark">Continue Shopping</RouterLink>
+            <RouterLink to="/" class="btn btn-dark">Tiếp Tục Mua Hàng</RouterLink>
         </div>
 
         <div class="row g-4" v-else>
@@ -44,10 +54,10 @@ const deleteAllCart = () => {
                         <table class="table align-middle mb-0">
                             <thead class="table-dark text-center">
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
+                                    <th>Sản Phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số Lượng</th>
+                                    <th>Tổng Tiền</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -113,7 +123,7 @@ const deleteAllCart = () => {
                             <span>Tổng cộng</span>
                             <span class="text-danger">{{ total.toLocaleString('vi-VN') }} ₫</span>
                         </div>
-                        <button class="btn btn-dark w-100 mt-4 fw-semibold">Mua ngay</button>
+                        <button class="btn btn-success w-100 mt-4 fw-semibold">Mua ngay</button>
                     </div>
                 </div>
             </div>

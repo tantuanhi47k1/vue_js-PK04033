@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'; // 1. Import useStore
 import axios from 'axios';
 
 const product = ref(null)
 const route = useRoute()
+const store = useStore(); // 2. Khởi tạo store
 const categories = ref([])
 
 const readProductDetail = async () => {
@@ -25,29 +27,11 @@ const readCategories = async () => {
     }
 }
 
-const addToCart = async () => {
-    if (!product.value) return;
-
-    try {
-        const { data: existingItems } = await axios.get(`http://localhost:3000/cart?id=${product.value.id}`);
-        const existingItem = existingItems[0];
-
-        if (existingItem) {
-            await axios.patch(`http://localhost:3000/cart/${existingItem.id}`, {
-                quantity: existingItem.quantity + 1
-            });
-            alert('Đã cập nhật số lượng sản phẩm trong giỏ hàng!');
-        } else {
-            const cartItem = {
-                ...product.value,
-                quantity: 1
-            };
-            await axios.post('http://localhost:3000/cart', cartItem);
-            alert('Đã thêm sản phẩm vào giỏ hàng!');
-        }
-    } catch (err) {
-        console.error('Lỗi khi thêm vào giỏ hàng:', err);
-        alert('Có lỗi xảy ra, vui lòng thử lại.');
+// 3. Sửa lại hàm addToCart để dispatch action của Vuex
+const addToCart = () => {
+    if (product.value) {
+        store.dispatch('cart/addProductToCart', product.value);
+        alert('Đã thêm sản phẩm vào giỏ hàng!');
     }
 }
 

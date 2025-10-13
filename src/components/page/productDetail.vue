@@ -25,6 +25,31 @@ const readCategories = async () => {
     }
 }
 
+const addToCart = async () => {
+    if (!product.value) return;
+
+    try {
+        const { data: existingItems } = await axios.get(`http://localhost:3000/cart?id=${product.value.id}`);
+        const existingItem = existingItems[0];
+
+        if (existingItem) {
+            await axios.patch(`http://localhost:3000/cart/${existingItem.id}`, {
+                quantity: existingItem.quantity + 1
+            });
+            alert('Đã cập nhật số lượng sản phẩm trong giỏ hàng!');
+        } else {
+            const cartItem = {
+                ...product.value,
+                quantity: 1
+            };
+            await axios.post('http://localhost:3000/cart', cartItem);
+            alert('Đã thêm sản phẩm vào giỏ hàng!');
+        }
+    } catch (err) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', err);
+        alert('Có lỗi xảy ra, vui lòng thử lại.');
+    }
+}
 
 onMounted(() => {
     readProductDetail()
@@ -72,9 +97,9 @@ onMounted(() => {
                     </p>
 
                     <div class="mt-4 d-flex gap-3">
-                        <button class="btn btn-warning px-4 py-2">
+                        <div @click="addToCart" class="btn btn-warning px-4 py-2">
                             <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
-                        </button>
+                        </div>
                         <button class="btn btn-outline-danger px-4 py-2">
                             <i class="fa fa-heart me-2" style="color: red;"></i>Yêu Thích
                         </button>

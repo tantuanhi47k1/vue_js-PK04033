@@ -77,13 +77,15 @@ const handleLogout = () => {
             <router-link to="/register" class="btn btn-warning btn-sm fw-semibold">Đăng ký</router-link>
           </template>
 
-          <div class="position-relative">
-            <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-              style="font-size: 10px;">
-              0
-            </span>
-          </div>
+          <router-link to="/cart">
+            <div class="position-relative">
+              <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 10px;">
+                0
+              </span>
+            </div>
+          </router-link>
         </div>
 
       </div>

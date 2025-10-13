@@ -12,7 +12,7 @@ import register from "../src/components/page/Register.vue";
 import shop from "../src/components/page/shop.vue";
 import productDetail from "../src/components/page/productDetail.vue";
 import profile from "../src/components/page/profile.vue";
-
+import cart from "../src/components/page/cart.vue";
 // admin pages
 import categories from "../src/components/admin/categories.vue";
 import CRUDUser from "../src/components/admin/CRUDUser.vue";
@@ -33,6 +33,7 @@ const routes = [
       { path: "shop", component: shop },
       { path: "productDetail/:id", component: productDetail },
       { path: "profile", component: profile },
+      { path: "cart", component: cart },
     ],
   },
   {

@@ -38,7 +38,7 @@ const routes = [
       { path: "profile", component: profile },
       { path: "cart", component: cart },
       { path: 'checkout', component: checkout },
-      { path: 'order-history', component: ordersHistory },
+      { path: 'ordersHistory', component: ordersHistory },
     ],
   },
   {

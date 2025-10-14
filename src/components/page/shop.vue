@@ -1,74 +1,76 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
 import Swal from 'sweetalert2'
 
 const store = useStore()
 
-const category = ref([])
+const categories = ref([])
 const products = ref([])
 const searchQuery = ref('')
 const sortOption = ref('Sắp xếp mặc định')
+const selectedCategoryId = ref(null)
 
-const readCategory = async () => {
+const readCategories = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/categories')
-    category.value = res.data
+    const { data } = await axios.get('http://localhost:3000/categories')
+    categories.value = data
   } catch (err) {
-    console.error('Error category:', err)
+    console.error('Error reading categories:', err)
   }
 }
 
-const readProduct = async () => {
+const readProducts = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/products')
-    products.value = res.data
-    sortProducts()
+    const { data } = await axios.get('http://localhost:3000/products')
+    products.value = data
   } catch (err) {
-    console.error('Error product:', err)
+    console.error('Error reading products:', err)
   }
 }
 
-const filteredProducts = computed(() => {
-  if (!searchQuery.value) {
-    return products.value
-  }
-  return products.value.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-})
+const selectCategory = (categoryId) => {
+  selectedCategoryId.value = categoryId
+}
 
-const sortProducts = () => {
-  let sorted = [...products.value]
+const filteredAndSortedProducts = computed(() => {
+  let tempProducts = [...products.value]
+
+  if (selectedCategoryId.value) {
+    tempProducts = tempProducts.filter(p => p.categoryId === selectedCategoryId.value)
+  }
+
+  if (searchQuery.value) {
+    tempProducts = tempProducts.filter(p =>
+      p.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  }
 
   switch (sortOption.value) {
     case 'Từ A -> Z':
-      sorted.sort((a, b) => a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' }))
+      tempProducts.sort((a, b) => a.name.localeCompare(b.name, 'vi'))
       break
     case 'Từ Z -> A':
-      sorted.sort((a, b) => b.name.localeCompare(a.name, 'vi', { sensitivity: 'base' }))
+      tempProducts.sort((a, b) => b.name.localeCompare(a.name, 'vi'))
       break
     case 'Giá tăng dần':
-      sorted.sort((a, b) => (a.discount || a.price) - (b.discount || b.price))
+      tempProducts.sort((a, b) => (a.discount || a.price) - (b.discount || b.price))
       break
     case 'Giá giảm dần':
-      sorted.sort((a, b) => (b.discount || b.price) - (a.discount || a.price))
+      tempProducts.sort((a, b) => (b.discount || b.price) - (a.discount || a.price))
       break
     default:
-      sorted.sort((a, b) => a.id - b.id)
+      tempProducts.sort((a, b) => a.id - b.id)
       break
   }
-  products.value = sorted
-}
 
-onMounted(() => {
-  readCategory()
-  readProduct()
+  return tempProducts
 })
 
-watch(sortOption, () => {
-  sortProducts()
+onMounted(() => {
+  readCategories()
+  readProducts()
 })
 
 const addToCart = (product) => {
@@ -78,7 +80,7 @@ const addToCart = (product) => {
     title: 'Đã thêm vào giỏ hàng!',
     showConfirmButton: "OK",
     confirmButtonColor: '#000',
-    text: 'Sản phâm đã được thêm vào giỏ hàng.',
+    text: 'Sản phẩm đã được thêm vào giỏ hàng.',
     timer: 2000
   })
 }
@@ -109,9 +111,20 @@ const toggleWishlist = (product) => {
 
           <h5 class="fw-bold mt-4 mb-3">Danh mục sản phẩm</h5>
           <ul class="list-unstyled sidebar-menu">
-            <li v-for="value in category" :key="value.id">
-              <a href="#" class="text-decoration-none text-dark d-block py-2">
-                {{ value.nameCategory }}
+            <li>
+              <a href="#" 
+                 @click.prevent="selectCategory(null)" 
+                 class="text-decoration-none text-dark d-block py-2"
+                 :class="{ 'active-category': selectedCategoryId === null }">
+                Tất cả sản phẩm
+              </a>
+            </li>
+            <li v-for="cat in categories" :key="cat.id">
+              <a href="#" 
+                 @click.prevent="selectCategory(cat.id)" 
+                 class="text-decoration-none text-dark d-block py-2"
+                 :class="{ 'active-category': selectedCategoryId === cat.id }">
+                {{ cat.nameCategory }}
               </a>
             </li>
           </ul>
@@ -120,7 +133,7 @@ const toggleWishlist = (product) => {
 
       <div class="col-lg-8">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <p class="mb-0 text-muted">Hiển thị {{ filteredProducts.length }} sản phẩm</p>
+          <p class="mb-0 text-muted">Hiển thị {{ filteredAndSortedProducts.length }} sản phẩm</p>
           <select v-model="sortOption" class="form-select w-auto">
             <option>Sắp xếp mặc định</option>
             <option>Từ A -> Z</option>
@@ -131,16 +144,12 @@ const toggleWishlist = (product) => {
         </div>
 
         <div class="row g-4">
-          <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="item in filteredProducts" :key="item.id">
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="item in filteredAndSortedProducts" :key="item.id">
             <div class="card border-0 shadow-sm h-100 product-card">
               <div class="position-relative product-image-container">
                 <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
                   <img :src="item.image[0]" class="card-img-top" alt="product" />
-                  <span
-                    v-if="item.discount < item.price"
-                    class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1"
-                    style="font-size: 0.8rem"
-                  >
+                  <span v-if="item.discount < item.price" class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1" style="font-size: 0.8rem">
                     Giảm giá!
                   </span>
                 </router-link>
@@ -155,9 +164,9 @@ const toggleWishlist = (product) => {
               </div>
 
               <div class="card-body text-center">
-                 <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
+                  <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
                     <p class="text-secondary small mb-1">
-                      {{ category.find((c) => c.id === item.categoryId)?.nameCategory || 'Không có' }}
+                      {{ categories.find((c) => c.id === item.categoryId)?.nameCategory || 'Không có' }}
                     </p>
                     <h6 class="fw-semibold">{{ item.name }}</h6>
                     <template v-if="item.discount < item.price">
@@ -179,7 +188,7 @@ const toggleWishlist = (product) => {
           </div>
         </div>
 
-        <p v-if="filteredProducts.length === 0" class="text-center text-muted mt-4">
+        <p v-if="filteredAndSortedProducts.length === 0" class="text-center text-muted mt-4">
           Không tìm thấy sản phẩm nào
         </p>
       </div>
@@ -189,7 +198,6 @@ const toggleWishlist = (product) => {
 </template>
 
 <style scoped>
-/* --- 6. Thêm CSS cho icon --- */
 .product-card {
   overflow: hidden;
 }
@@ -201,7 +209,7 @@ const toggleWishlist = (product) => {
 .product-icons {
   position: absolute;
   top: 10px;
-  right: -50px; /* Ẩn icon ban đầu */
+  right: -50px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -209,7 +217,7 @@ const toggleWishlist = (product) => {
 }
 
 .product-card:hover .product-icons {
-  right: 10px; /* Hiện icon khi hover */
+  right: 10px;
 }
 
 .product-icons a {
@@ -233,11 +241,11 @@ const toggleWishlist = (product) => {
 .product-icons .text-danger .fa-heart {
   color: red;
 }
-/* --- Hết phần thêm CSS --- */
 
-.sidebar-menu li a:hover {
-  color: #000;
-  font-weight: 500;
+.sidebar-menu li a:hover,
+.active-category {
+  color: #35d1dc !important;
+  font-weight: 700;
 }
 
 .card img {

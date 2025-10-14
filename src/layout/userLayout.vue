@@ -79,7 +79,7 @@ const handleLogout = () => {
           <div class="d-flex align-items-center gap-3">
             <template v-if="user">
               <span class="text-dark">
-                <i class="fa-solid fa-user" style="color: #000000"></i>
+                <i class="fa-solid fa-user" style="color: aquamarine;"></i>
                 Xin chào 👋,
                 <b style="color: chocolate">{{ user.fullname }} !</b>
               </span>
@@ -107,7 +107,7 @@ const handleLogout = () => {
             </template>
 
             <router-link to="/wishlist" class="position-relative">
-              <i class="fa-solid fa-heart fs-5 text-dark"></i>
+              <i class="fa-solid fa-heart fs-5 text-danger"></i>
               <span
                 v-if="wishlistCount > 0"
                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -118,7 +118,7 @@ const handleLogout = () => {
             </router-link>
 
             <router-link to="/cart" class="position-relative">
-              <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
+              <i class="fa-solid fa-cart-shopping fs-5 text-success"></i>
               <span
                 v-if="cartItemCount > 0"
                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"

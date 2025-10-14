@@ -1,32 +1,97 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 const orders = ref([]);
 const isLoading = ref(true);
+const store = useStore();
+const router = useRouter();
 
 const getStatusClass = (status) => {
   switch (status) {
-    case 'Processing': return 'text-primary';
-    case 'Shipped': return 'text-info';
-    case 'Delivered': return 'text-success';
-    case 'Cancelled': return 'text-danger';
+    case 'Chờ xử lý': return 'text-primary';
+    case 'Đang giao': return 'text-info';
+    case 'Đã giao': return 'text-success';
+    case 'Đã huỷ': return 'text-danger';
     default: return 'text-muted';
   }
 };
 
-onMounted(async () => {
+const fetchOrders = async () => {
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   if (loggedInUser) {
     try {
       const { data } = await axios.get(`http://localhost:3000/orders?userId=${loggedInUser.id}`);
       orders.value = data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-    } catch (err) {
+    } catch (err)      {
       console.error("Lỗi khi tải lịch sử đơn hàng:", err);
     }
   }
   isLoading.value = false;
-});
+};
+
+// huỷ đơn
+const cancelOrder = async (orderId) => {
+  const result = await Swal.fire({
+    title: 'Bạn chắc chắn muốn huỷ?',
+    text: "Hành động này không thể hoàn tác!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Đồng ý huỷ!',
+    cancelButtonText: 'Không'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.patch(`http://localhost:3000/orders/${orderId}`, { status: 'Cancelled' });
+
+      fetchOrders();
+
+      Swal.fire(
+        'Đã huỷ!',
+        'Đơn hàng của bạn đã được huỷ thành công.',
+        'success'
+      );
+    } catch (err) {
+      console.error('Lỗi khi huỷ đơn hàng:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không thể huỷ đơn hàng. Vui lòng thử lại sau.'
+      });
+    }
+  }
+};
+
+// mua lại
+const buyAgain = (order) => {
+  if (confirm('Bạn có muốn thêm tất cả sản phẩm của đơn hàng này vào giỏ hàng không?')) {
+    order.products.forEach(product => {
+      store.dispatch('cart/addToCart', {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: product.quantity
+      });
+    });
+    Swal.fire({
+      icon: 'success',
+      title: 'Thành công',
+      text: 'Sản phẩm đã được thêm lại vào giỏ hàng!'
+    });
+    router.push('/cart');
+  }
+};
+
+
+onMounted(fetchOrders);
+
 </script>
 
 <template>
@@ -60,6 +125,20 @@ onMounted(async () => {
                 {{ product.name }} (x{{ product.quantity }})
               </li>
             </ul>
+            <hr>
+            <div class="d-flex justify-content-end">
+              <button
+                v-if="order.status === 'Chờ xử lý'"
+                @click="cancelOrder(order.id)"
+                class="btn btn-danger me-2">
+                Huỷ đơn
+              </button>
+              <button
+                @click="buyAgain(order)"
+                class="btn btn-primary">
+                Mua lại
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const product = ref(null);
 const route = useRoute();
@@ -53,7 +54,14 @@ const readRelatedProducts = async () => {
 const addToCart = () => {
   if (product.value) {
     store.dispatch("cart/addProductToCart", product.value);
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
+    Swal.fire({
+    icon: 'success',
+    title: 'Đã thêm vào giỏ hàng!',
+    showConfirmButton: "OK",
+    confirmButtonColor: '#000',
+    text: 'Sản phâm đã được thêm vào giỏ hàng.',
+    timer: 2000
+  })
   }
 };
 

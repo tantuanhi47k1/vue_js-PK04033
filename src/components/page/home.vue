@@ -1,65 +1,103 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useStore } from 'vuex';
+import Swal from 'sweetalert2';
 
-const category = ref([])
-const products = ref([])
+const category = ref([]);
+const products = ref([]);
+const store = useStore();
 
-const scrollContainer = ref(null)
-const scrollLeft = () => scrollContainer.value.scrollBy({ left: -350, behavior: 'smooth' })
-const scrollRight = () => scrollContainer.value.scrollBy({ left: 350, behavior: 'smooth' })
+const scrollContainer = ref(null);
+const scrollLeft = () =>
+  scrollContainer.value.scrollBy({ left: -350, behavior: "smooth" });
+const scrollRight = () =>
+  scrollContainer.value.scrollBy({ left: 350, behavior: "smooth" });
 
-const productScroll = ref(null)
-const scrollProductLeft = () => productScroll.value.scrollBy({ left: -350, behavior: 'smooth' })
-const scrollProductRight = () => productScroll.value.scrollBy({ left: 350, behavior: 'smooth' })
+const productScroll = ref(null);
+const scrollProductLeft = () =>
+  productScroll.value.scrollBy({ left: -350, behavior: "smooth" });
+const scrollProductRight = () =>
+  productScroll.value.scrollBy({ left: 350, behavior: "smooth" });
 
 const readCategory = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/categories')
-    category.value = res.data
+    const res = await axios.get("http://localhost:3000/categories");
+    category.value = res.data;
   } catch (err) {
-    console.error("Error: ", err)
+    console.error("Error: ", err);
   }
-}
+};
 
 const readProduct = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/products')
-    products.value = res.data
+    const res = await axios.get("http://localhost:3000/products");
+    products.value = res.data;
   } catch (err) {
-    console.error("Error: ", err)
+    console.error("Error: ", err);
   }
+};
+
+const addToCart = (product) => {
+  store.dispatch('cart/addProductToCart', product)
+  Swal.fire({
+    icon: 'success',
+    title: 'Đã thêm vào giỏ hàng!',
+    showConfirmButton: "OK",
+    confirmButtonColor: '#000',
+    text: 'Sản phâm đã được thêm vào giỏ hàng.',
+    timer: 2000
+  })
 }
 
 onMounted(() => {
-  readCategory()
-  readProduct()
-})
+  readCategory();
+  readProduct();
+});
 </script>
 
 <template>
   <div class="home bg-light">
-
-    <section class="hero position-relative d-flex align-items-center justify-content-center text-center text-white">
-      <img src="https://phukienvang.com/wp-content/uploads/2023/10/banner-tai-nghe-marshall-pkvaudio.jpg"
-           class="position-absolute w-100 h-100 object-fit-cover" alt="banner" />
-      <div class="overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.55);"></div>
+    <section
+      class="hero position-relative d-flex align-items-center justify-content-center text-center text-white"
+    >
+      <img
+        src="https://phukienvang.com/wp-content/uploads/2023/10/banner-tai-nghe-marshall-pkvaudio.jpg"
+        class="position-absolute w-100 h-100 object-fit-cover"
+        alt="banner"
+      />
+      <div
+        class="overlay position-absolute w-100 h-100"
+        style="background: rgba(0, 0, 0, 0.55)"
+      ></div>
     </section>
 
     <section class="container my-5">
       <div class="text-center mb-5">
         <h2 class="fw-bold text-uppercase mb-2">Khám Phá Danh Mục</h2>
-        <p class="text-muted">Khám phá các lựa chọn hàng đầu của chúng tôi cho mọi dịp</p>
+        <p class="text-muted">
+          Khám phá các lựa chọn hàng đầu của chúng tôi cho mọi dịp
+        </p>
       </div>
 
       <div class="row g-4 justify-content-center">
-        <div class="col-6 col-md-4 col-lg-3" v-for="items in category" :key="items.id">
+        <div
+          class="col-6 col-md-4 col-lg-3"
+          v-for="items in category"
+          :key="items.id"
+        >
           <div class="card border-0 shadow-sm overflow-hidden category-card">
             <div class="position-relative">
-              <img :src="items.image" class="w-100" style="height: 250px; object-fit: cover;" />
+              <img
+                :src="items.image"
+                class="w-100"
+                style="height: 250px; object-fit: cover"
+              />
             </div>
             <div class="p-3 text-center">
-              <h6 class="fw-semibold" style="cursor: pointer;">{{ items.nameCategory }}</h6>
+              <h6 class="fw-semibold" style="cursor: pointer">
+                {{ items.nameCategory }}
+              </h6>
               <small class="text-muted">{{ items.moTa }}</small>
             </div>
           </div>
@@ -70,16 +108,33 @@ onMounted(() => {
     <section class="container my-5">
       <div class="text-center mb-5">
         <h2 class="fw-bold text-uppercase mb-2">Sản Phẩm Bán Chạy</h2>
-        <p class="text-muted">Những sản phẩm bán chạy nhất được mọi người yêu thích</p>
+        <p class="text-muted">
+          Những sản phẩm bán chạy nhất được mọi người yêu thích
+        </p>
       </div>
 
       <div class="row g-4">
-        <div class="col-6 col-md-4 col-lg-3" v-for="item in products" :key="item.id">
-          <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
-            <div class="card border-0 shadow-sm h-100 product-card">
+        <div
+          class="col-6 col-md-4 col-lg-3"
+          v-for="item in products"
+          :key="item.id"
+        >
+          <div class="card border-0 shadow-sm h-100 product-card">
+            <router-link
+              :to="`/productDetail/${item.id}`"
+              class="text-decoration-none text-dark"
+            >
               <div class="position-relative">
-                <img :src="item.image[0]" class="w-100" style="height: 260px; object-fit: cover;" />
-                <span v-if="item.discount < item.price" class="badge bg-danger position-absolute top-0 start-0 m-2">GIẢM GIÁ</span>
+                <img
+                  :src="item.image[0]"
+                  class="w-100"
+                  style="height: 260px; object-fit: cover"
+                />
+                <span
+                  v-if="item.discount < item.price"
+                  class="badge bg-danger position-absolute top-0 start-0 m-2"
+                  >-{{ Math.round(100 - (item.discount / item.price) * 100) }}%</span
+                >
               </div>
 
               <div class="card-body text-center">
@@ -87,32 +142,40 @@ onMounted(() => {
 
                 <template v-if="item.discount < item.price">
                   <p class="text-muted text-decoration-line-through small mb-0">
-                    {{ Number(item.price).toLocaleString('vi-VN') }} ₫
+                    {{ Number(item.price).toLocaleString("vi-VN") }} ₫
                   </p>
                   <p class="fw-bold text-danger mb-1">
-                    {{ Number(item.discount).toLocaleString('vi-VN') }} ₫
+                    {{ Number(item.discount).toLocaleString("vi-VN") }} ₫
                   </p>
                 </template>
 
                 <template v-else>
-                  <p class="fw-bold mb-1">{{ Number(item.price).toLocaleString('vi-VN') }} ₫</p>
+                  <p class="fw-bold text-danger mb-1">
+                    {{ Number(item.price).toLocaleString("vi-VN") }} ₫
+                  </p>
                 </template>
-
-                <button class="btn btn-dark btn-sm rounded-pill mt-2">Thêm vào giỏ</button>
               </div>
+            </router-link>
+
+            <div class="text-center pb-3">
+              <button @click="addToCart(item)"
+                class="btn btn-dark btn-sm rounded-pill mt-2"
+              >
+                Thêm vào giỏ
+              </button>
             </div>
-          </router-link>
+          </div>
         </div>
       </div>
     </section>
   </div>
 </template>
 
-
 <style scoped>
 .hero {
   position: relative;
-  background: url("https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+  background: url("https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=1600&q=80")
+    center/cover no-repeat;
   height: 80vh;
 }
 
@@ -272,7 +335,6 @@ onMounted(() => {
   background-color: #0056b3 !important; /* đậm hơn khi hover */
   transform: scale(1.05);
 }
-
 
 /* GENERAL */
 section h2 {

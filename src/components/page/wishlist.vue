@@ -24,11 +24,11 @@ const formatPrice = (price) => {
 
 <template>
   <div class="container my-5">
-    <h2 class="mb-4">Sản phẩm yêu thích</h2>
+    <h2 class="mb-4" style="text-align: center;">Sản phẩm yêu thích ♥</h2>
 
     <div v-if="wishlist.length === 0" class="text-center mt-5">
       <p class="fs-5">Danh sách yêu thích của bạn đang trống.</p>
-      <router-link to="/shop" class="btn btn-primary mt-2">Bắt đầu mua sắm</router-link>
+      <router-link to="/shop" class="btn btn-success mt-2">Bắt đầu mua sắm</router-link>
     </div>
 
     <div v-else class="row g-4">

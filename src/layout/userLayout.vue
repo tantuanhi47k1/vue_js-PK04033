@@ -36,15 +36,6 @@ const handleLogout = () => {
   <header>
     <nav class="navbar navbar-expand-lg shadow-sm sticky-top custom-navbar">
       <div class="container">
-        <!-- Logo -->
-        <router-link class="navbar-brand d-flex align-items-center" to="/">
-          <img
-            src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png"
-            alt="logo"
-            width="110"
-            class="me-2"
-          />
-        </router-link>
 
         <!-- Nút thu gọn (mobile) -->
         <button
@@ -80,6 +71,16 @@ const handleLogout = () => {
               <hr class="dropdown-divider" />
             </li>
           </ul>
+
+          <!-- Logo -->
+        <router-link class="navbar-brand d-flex align-items-center" to="/">
+          <img
+            src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png"
+            alt="logo"
+            width="110"
+            class="me-2"
+          />
+        </router-link>
 
           <div class="d-flex align-items-center gap-3">
             <template v-if="user">

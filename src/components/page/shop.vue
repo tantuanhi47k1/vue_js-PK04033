@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue' // <-- 1. Thêm 'computed'
+import { ref, onMounted, watch, computed } from 'vue'
 import axios from 'axios'
-import { useStore } from 'vuex' // <-- 2. Import useStore để dùng Vuex
+import { useStore } from 'vuex'
+import Swal from 'sweetalert2'
 
-const store = useStore() // <-- 3. Khởi tạo store
+const store = useStore()
 
 const category = ref([])
 const products = ref([])
@@ -29,7 +30,6 @@ const readProduct = async () => {
   }
 }
 
-// Lọc sản phẩm dựa trên searchQuery
 const filteredProducts = computed(() => {
   if (!searchQuery.value) {
     return products.value
@@ -71,10 +71,16 @@ watch(sortOption, () => {
   sortProducts()
 })
 
-// --- 4. Thêm các hàm cho giỏ hàng và yêu thích ---
 const addToCart = (product) => {
   store.dispatch('cart/addProductToCart', product)
-  alert('Đã thêm vào giỏ hàng!')
+  Swal.fire({
+    icon: 'success',
+    title: 'Đã thêm vào giỏ hàng!',
+    showConfirmButton: "OK",
+    confirmButtonColor: '#000',
+    text: 'Sản phâm đã được thêm vào giỏ hàng.',
+    timer: 2000
+  })
 }
 
 const isInWishlist = (productId) => {
@@ -88,7 +94,6 @@ const toggleWishlist = (product) => {
     store.dispatch('wishlist/addToWishlist', product)
   }
 }
-// --- Hết phần thêm ---
 </script>
 
 <template>
@@ -140,7 +145,7 @@ const toggleWishlist = (product) => {
                   </span>
                 </router-link>
                 <div class="product-icons">
-                  <a href="#" @click.prevent="addToCart(item)" class="text-dark">
+                  <a href="#" @click.prevent="addToCart(item)" class="text-success">
                     <i class="fa fa-cart-plus"></i>
                   </a>
                   <a href="#" @click.prevent="toggleWishlist(item)" :class="{ 'text-danger': isInWishlist(item.id) }">

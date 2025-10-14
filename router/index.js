@@ -13,6 +13,9 @@ import shop from "../src/components/page/shop.vue";
 import productDetail from "../src/components/page/productDetail.vue";
 import profile from "../src/components/page/profile.vue";
 import cart from "../src/components/page/cart.vue";
+import checkout from "@/components/page/checkout.vue";
+import ordersHistory from "@/components/page/ordersHistory.vue";
+import manageOrders from "@/components/admin/manageOrders.vue";
 // admin pages
 import categories from "../src/components/admin/categories.vue";
 import CRUDUser from "../src/components/admin/CRUDUser.vue";
@@ -34,6 +37,8 @@ const routes = [
       { path: "productDetail/:id", component: productDetail },
       { path: "profile", component: profile },
       { path: "cart", component: cart },
+      { path: 'checkout', component: checkout },
+      { path: 'order-history', component: ordersHistory },
     ],
   },
   {
@@ -46,6 +51,7 @@ const routes = [
       { path: "categories", component: categories },
       { path: "product", component: product },
       { path: "readProduct/:id", component: readProduct },
+      { path: 'orders', component: manageOrders }
     ],
   },
   {

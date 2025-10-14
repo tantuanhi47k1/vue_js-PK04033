@@ -15,13 +15,16 @@
                     </li>
                     <li>
                         <router-link to="/admin/categories" class="nav-link" active-class="active-link">
-                            📦 Danh Mục
+                            🧾 Danh Mục
                         </router-link>
                     </li>
                     <li>
                         <router-link to="/admin/product" class="nav-link" active-class="active-link">
                             📦 Sản Phẩm
                         </router-link>
+                    </li>
+                    <li class="nav-item">
+                        <RouterLink to="/admin/orders" class="nav-link">⚙️ QLý Đơn Hàng</RouterLink>
                     </li>
                 </ul>
 

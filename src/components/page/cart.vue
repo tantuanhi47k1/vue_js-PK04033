@@ -123,7 +123,9 @@ const deleteAllCart = () => {
                             <span>Tổng cộng</span>
                             <span class="text-danger">{{ total.toLocaleString('vi-VN') }} ₫</span>
                         </div>
-                        <button class="btn btn-success w-100 mt-4 fw-semibold">Mua ngay</button>
+                        <RouterLink to="/checkout" class="btn btn-dark w-100 mt-4 fw-semibold">
+  Tiến hành thanh toán
+</RouterLink>
                     </div>
                 </div>
             </div>

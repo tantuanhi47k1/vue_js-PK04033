@@ -1,11 +1,11 @@
 <template>
     <div class="notfound d-flex flex-column justify-content-center align-items-center text-center">
-        <h1 class="display-1 fw-bold text-dark glitch">404</h1>
+        <h1 class="display-1 fw-bold text-dark glitch">404 - Lỗi rồi nè emiu</h1>
         <p class="lead text-secondary mb-4">
-            Oops... The page you’re looking for doesn’t exist or has been moved 🕵️‍♂️
+            Ôi không! Trang bạn tìm kiếm không tồn tại hoặc đã bị hack rồi 🕵️‍♂️
         </p>
         <router-link to="/" class="btn btn-dark px-4 py-2 rounded-pill fw-semibold">
-            Back to Home
+            Trở về Trang Chủ
         </router-link>
     </div>
 </template>

@@ -1,165 +1,233 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router'
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-const router = useRouter()
-const user = ref(null)
+const router = useRouter();
+const user = ref(null);
 
 onMounted(async () => {
-  const storedUser = JSON.parse(localStorage.getItem('loggedInUser'))
+  const storedUser = JSON.parse(localStorage.getItem("loggedInUser"));
   if (storedUser) {
     try {
-      const res = await axios.get(`http://localhost:3000/user/${storedUser.id}`)
-      user.value = res.data
+      const res = await axios.get(
+        `http://localhost:3000/user/${storedUser.id}`
+      );
+      user.value = res.data;
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
   }
-})
+});
 
 const handleLogout = () => {
-  localStorage.removeItem('loggedInUser')
-  user.value = null
-  router.push('/login')
-}
+  localStorage.removeItem("loggedInUser");
+  user.value = null;
+  router.push("/login");
+};
 </script>
 
 <template>
   <header>
-  <nav class="navbar navbar-expand-lg shadow-sm sticky-top custom-navbar">
-    <div class="container">
-      <!-- Logo -->
-      <router-link class="navbar-brand d-flex align-items-center" to="/">
-        <img src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png" alt="logo"
-          width="110" class="me-2" />
-      </router-link>
+    <nav class="navbar navbar-expand-lg shadow-sm sticky-top custom-navbar">
+      <div class="container">
+        <!-- Logo -->
+        <router-link class="navbar-brand d-flex align-items-center" to="/">
+          <img
+            src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png"
+            alt="logo"
+            width="110"
+            class="me-2"
+          />
+        </router-link>
 
-      <!-- Nút thu gọn (mobile) -->
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <i class="fa fa-bars text-dark fs-4"></i>
-      </button>
+        <!-- Nút thu gọn (mobile) -->
+        <button
+          class="navbar-toggler border-0"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <i class="fa fa-bars text-dark fs-4"></i>
+        </button>
 
-      <!-- Liên kết điều hướng -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav mx-auto text-center gap-lg-4">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/">Trang chủ</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/shop">Cửa hàng</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/about">Giới thiệu</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/profile">Hồ sơ</router-link>
-          </li>
-        </ul>
+        <!-- Liên kết điều hướng -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mx-auto text-center gap-lg-4">
+            <li class="nav-item">
+              <router-link class="nav-link" to="/">Trang chủ</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/shop">Cửa hàng</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/about">Giới thiệu</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/profile">Hồ sơ</router-link>
+            </li>
+            <li>
+              <RouterLink to="/ordersHistory" class="nav-link"
+                >Lịch sử mua hàng</RouterLink
+              >
+            </li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+          </ul>
 
-        <!-- Hành động bên phải -->
-        <div class="d-flex align-items-center gap-2">
-          <template v-if="user">
-            <span class="text-dark">
-              <i class="fa-solid fa-user" style="color: #000000;"></i>
-              Xin chào 👋, <b style="color: chocolate;">{{ user.fullname }} !</b>
-            </span>
+          <!-- Hành động bên phải -->
+          <div class="d-flex align-items-center gap-2">
+            <template v-if="user">
+              <span class="text-dark">
+                <i class="fa-solid fa-user" style="color: #000000"></i>
+                Xin chào 👋,
+                <b style="color: chocolate">{{ user.fullname }} !</b>
+              </span>
 
-            <template v-if="user.role === 'admin'">
-              <router-link to="/admin" class="btn btn-info btn-sm fw-semibold">Admin | Quản lý</router-link>
+              <template v-if="user.role === 'admin'">
+                <router-link to="/admin" class="btn btn-info btn-sm fw-semibold"
+                  >Admin | Quản lý</router-link
+                >
+              </template>
+
+              <button
+                @click="handleLogout"
+                class="btn btn-outline-danger btn-sm"
+              >
+                Đăng xuất
+              </button>
             </template>
 
-            <button @click="handleLogout" class="btn btn-outline-danger btn-sm">Đăng xuất</button>
-          </template>
+            <template v-else>
+              <router-link to="/login" class="btn btn-outline-primary btn-sm"
+                >Đăng nhập</router-link
+              >
+              <router-link
+                to="/register"
+                class="btn btn-warning btn-sm fw-semibold"
+                >Đăng ký</router-link
+              >
+            </template>
 
-          <template v-else>
-            <router-link to="/login" class="btn btn-outline-primary btn-sm">Đăng nhập</router-link>
-            <router-link to="/register" class="btn btn-warning btn-sm fw-semibold">Đăng ký</router-link>
-          </template>
-
-          <router-link to="/cart">
-            <div class="position-relative">
-              <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                style="font-size: 10px;">
-                2
-              </span>
-            </div>
-          </router-link>
+            <router-link to="/cart">
+              <div class="position-relative">
+                <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
+                <span
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  style="font-size: 10px"
+                >
+                  2
+                </span>
+              </div>
+            </router-link>
+          </div>
         </div>
-
       </div>
-    </div>
-  </nav>
-</header>
-
+    </nav>
+  </header>
 
   <!-- Router view -->
   <router-view />
 
   <!-- FOOTER -->
- <footer class="footer text-dark mt-5">
-  <div class="container py-5">
-    <div class="row gy-4">
-      <!-- Logo + Description -->
-      <div class="col-lg-3 col-md-6">
-        <router-link class="navbar-brand d-flex align-items-center" to="/">
-          <img src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png" alt="logo"
-            width="150" class="me-2" />
-        </router-link>
-        <p class="small text-secondary mb-3">
-          <i class="fas fa-headphones-alt me-2"></i>
-          Nơi âm thanh hòa cùng công nghệ ✨ — Khám phá những mẫu tai nghe chất lượng cao, mang đến trải nghiệm nghe nhạc đỉnh cao cùng KaynStyle.
-        </p>
-        <div class="d-flex gap-3">
-          <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="social"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="social"><i class="fab fa-tiktok"></i></a>
-          <a href="#" class="social"><i class="fab fa-twitter"></i></a>
+  <footer class="footer text-dark mt-5">
+    <div class="container py-5">
+      <div class="row gy-4">
+        <!-- Logo + Description -->
+        <div class="col-lg-3 col-md-6">
+          <router-link class="navbar-brand d-flex align-items-center" to="/">
+            <img
+              src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png"
+              alt="logo"
+              width="150"
+              class="me-2"
+            />
+          </router-link>
+          <p class="small text-secondary mb-3">
+            <i class="fas fa-headphones-alt me-2"></i>
+            Nơi âm thanh hòa cùng công nghệ ✨ — Khám phá những mẫu tai nghe
+            chất lượng cao, mang đến trải nghiệm nghe nhạc đỉnh cao cùng
+            KaynStyle.
+          </p>
+          <div class="d-flex gap-3">
+            <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social"><i class="fab fa-tiktok"></i></a>
+            <a href="#" class="social"><i class="fab fa-twitter"></i></a>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-semibold mb-3 text-black">Liên kết nhanh</h6>
+          <ul class="list-unstyled footer-links">
+            <li>
+              <router-link to="/" class="text-decoration-none"
+                >Trang chủ</router-link
+              >
+            </li>
+            <li>
+              <router-link to="/categories" class="text-decoration-none"
+                >Danh mục</router-link
+              >
+            </li>
+            <li>
+              <router-link to="/about" class="text-decoration-none"
+                >Giới thiệu</router-link
+              >
+            </li>
+            <li>
+              <router-link to="/crud" class="text-decoration-none"
+                >Người dùng</router-link
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-semibold mb-3 text-black">Hỗ trợ</h6>
+          <ul class="list-unstyled footer-links">
+            <li>
+              <a href="#" class="text-decoration-none">Câu hỏi thường gặp</a>
+            </li>
+            <li>
+              <a href="#" class="text-decoration-none">Chính sách bảo mật</a>
+            </li>
+            <li>
+              <a href="#" class="text-decoration-none">Điều khoản dịch vụ</a>
+            </li>
+            <li><a href="#" class="text-decoration-none">Liên hệ</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-semibold mb-3 text-black">Liên hệ với KaynStyle</h6>
+          <p class="small mb-1">
+            <i class="fa fa-map-marker-alt me-2"></i>Buôn Ma Thuột, Đắk Lắk,
+            Việt Nam
+          </p>
+          <p class="small mb-1">
+            <i class="fa fa-envelope me-2"></i>support@kaynstyle.vn
+          </p>
+          <p class="small mb-0">
+            <i class="fa fa-phone me-2"></i>+84 987 654 321
+          </p>
         </div>
       </div>
-
-      <!-- Links -->
-      <div class="col-lg-3 col-md-6">
-        <h6 class="fw-semibold mb-3 text-black">Liên kết nhanh</h6>
-        <ul class="list-unstyled footer-links">
-          <li><router-link to="/" class="text-decoration-none">Trang chủ</router-link></li>
-          <li><router-link to="/categories" class="text-decoration-none">Danh mục</router-link></li>
-          <li><router-link to="/about" class="text-decoration-none">Giới thiệu</router-link></li>
-          <li><router-link to="/crud" class="text-decoration-none">Người dùng</router-link></li>
-        </ul>
-      </div>
-
-      <!-- Support -->
-      <div class="col-lg-3 col-md-6">
-        <h6 class="fw-semibold mb-3 text-black">Hỗ trợ</h6>
-        <ul class="list-unstyled footer-links">
-          <li><a href="#" class="text-decoration-none">Câu hỏi thường gặp</a></li>
-          <li><a href="#" class="text-decoration-none">Chính sách bảo mật</a></li>
-          <li><a href="#" class="text-decoration-none">Điều khoản dịch vụ</a></li>
-          <li><a href="#" class="text-decoration-none">Liên hệ</a></li>
-        </ul>
-      </div>
-
-      <!-- Contact -->
-      <div class="col-lg-3 col-md-6">
-        <h6 class="fw-semibold mb-3 text-black">Liên hệ với KaynStyle</h6>
-        <p class="small mb-1"><i class="fa fa-map-marker-alt me-2"></i>Buôn Ma Thuột, Đắk Lắk, Việt Nam</p>
-        <p class="small mb-1"><i class="fa fa-envelope me-2"></i>support@kaynstyle.vn</p>
-        <p class="small mb-0"><i class="fa fa-phone me-2"></i>+84 987 654 321</p>
-      </div>
     </div>
-  </div>
 
-  <!-- Copyright -->
-  <div class="footer-bottom text-center py-3 mt-4 border-top border-secondary">
-    <p class="mb-0 small text-secondary">
-      &copy; 2025 <b>KaynStyle</b> — Mọi quyền được bảo lưu.
-    </p>
-  </div>
-</footer>
-
-
+    <!-- Copyright -->
+    <div
+      class="footer-bottom text-center py-3 mt-4 border-top border-secondary"
+    >
+      <p class="mb-0 small text-secondary">
+        &copy; 2025 <b>KaynStyle</b> — Mọi quyền được bảo lưu.
+      </p>
+    </div>
+  </footer>
 </template>
 
 <style scoped>

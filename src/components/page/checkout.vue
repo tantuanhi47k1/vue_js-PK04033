@@ -11,7 +11,8 @@ const router = useRouter();
 const userInfo = ref({
   fullname: '',
   address: '',
-  phone: ''
+  phone: '',
+  note: ''
 });
 const paymentMethod = ref('cod');
 const couponCode = ref('');
@@ -69,17 +70,16 @@ const placeOrder = async () => {
     products: cart.value,
     subtotal: subtotal.value,
     discount: discount.value,
+    note: userInfo.value.note,
     total: total.value,
     paymentMethod: paymentMethod.value,
-    status: 'Processing', // Trạng thái ban đầu
+    status: 'Chờ xử lý',
     orderDate: new Date().toISOString()
   };
 
   try {
-    // Lưu đơn hàng
     await axios.post('http://localhost:3000/orders', orderDetails);
 
-    // Xóa giỏ hàng sau khi đặt hàng thành công
     await store.dispatch('cart/deleteAllCart');
 
     Swal.fire({
@@ -87,7 +87,7 @@ const placeOrder = async () => {
       title: 'Đặt hàng thành công!',
       text: 'Cảm ơn bạn đã mua hàng.',
     }).then(() => {
-      router.push('/order-history'); // Chuyển đến trang lịch sử đơn hàng
+      router.push('/ordersHistory');
     });
 
   } catch (err) {
@@ -118,6 +118,10 @@ const placeOrder = async () => {
           <div class="mb-3">
             <label class="form-label">Số điện thoại</label>
             <input type="tel" v-model="userInfo.phone" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ghi chú (tùy chọn)</label>
+            <textarea v-model="userInfo.note" class="form-control" rows="3"></textarea>
           </div>
         </div>
 

@@ -27,6 +27,7 @@ const deleteCartItem = (itemId) => {
   );
   if (isConfirm) {
     store.dispatch("cart/deleteCart", itemId);
+    alert("Đã xoá sản phẩm khỏi giỏ hàng!");
   }
 };
 
@@ -167,7 +168,7 @@ const deleteAllCart = () => {
             </div>
             <RouterLink
               to="/checkout"
-              class="btn btn-dark w-100 mt-4 fw-semibold"
+              class="btn btn-outline-success w-100 mt-4 fw-semibold"
             >
               Tiến hành thanh toán
             </RouterLink>
@@ -203,4 +204,6 @@ input[type="number"] {
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
+
+
 </style>

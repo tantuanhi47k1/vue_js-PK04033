@@ -16,6 +16,8 @@ import cart from "../src/components/page/cart.vue";
 import checkout from "@/components/page/checkout.vue";
 import ordersHistory from "@/components/page/ordersHistory.vue";
 import manageOrders from "@/components/admin/manageOrders.vue";
+import wishlist from "@/components/page/wishlist.vue";
+
 // admin pages
 import categories from "../src/components/admin/categories.vue";
 import CRUDUser from "../src/components/admin/CRUDUser.vue";
@@ -39,6 +41,7 @@ const routes = [
       { path: "cart", component: cart },
       { path: 'checkout', component: checkout },
       { path: 'ordersHistory', component: ordersHistory },
+      { path: 'wishlist', component: wishlist}
     ],
   },
   {

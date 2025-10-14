@@ -1,6 +1,9 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue' // <-- 1. Thêm 'computed'
 import axios from 'axios'
+import { useStore } from 'vuex' // <-- 2. Import useStore để dùng Vuex
+
+const store = useStore() // <-- 3. Khởi tạo store
 
 const category = ref([])
 const products = ref([])
@@ -26,6 +29,16 @@ const readProduct = async () => {
   }
 }
 
+// Lọc sản phẩm dựa trên searchQuery
+const filteredProducts = computed(() => {
+  if (!searchQuery.value) {
+    return products.value
+  }
+  return products.value.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
 const sortProducts = () => {
   let sorted = [...products.value]
 
@@ -33,23 +46,19 @@ const sortProducts = () => {
     case 'Từ A -> Z':
       sorted.sort((a, b) => a.name.localeCompare(b.name, 'vi', { sensitivity: 'base' }))
       break
-
     case 'Từ Z -> A':
       sorted.sort((a, b) => b.name.localeCompare(a.name, 'vi', { sensitivity: 'base' }))
       break
-
     case 'Giá tăng dần':
       sorted.sort((a, b) => (a.discount || a.price) - (b.discount || b.price))
       break
-
     case 'Giá giảm dần':
       sorted.sort((a, b) => (b.discount || b.price) - (a.discount || a.price))
       break
-
     default:
       sorted.sort((a, b) => a.id - b.id)
+      break
   }
-
   products.value = sorted
 }
 
@@ -61,26 +70,38 @@ onMounted(() => {
 watch(sortOption, () => {
   sortProducts()
 })
-</script>
 
+// --- 4. Thêm các hàm cho giỏ hàng và yêu thích ---
+const addToCart = (product) => {
+  store.dispatch('cart/addProductToCart', product)
+  alert('Đã thêm vào giỏ hàng!')
+}
+
+const isInWishlist = (productId) => {
+  return store.getters['wishlist/isInWishlist'](productId)
+}
+
+const toggleWishlist = (product) => {
+  if (isInWishlist(product.id)) {
+    store.dispatch('wishlist/removeFromWishlist', product.id)
+  } else {
+    store.dispatch('wishlist/addToWishlist', product)
+  }
+}
+// --- Hết phần thêm ---
+</script>
 
 <template>
   <div class="container-fluid my-5">
     <div class="row">
-      <!-- Sidebar -->
       <div class="col-lg-1 mb-4"></div>
       <div class="col-lg-2 mb-4">
         <div class="p-3 border rounded shadow-sm bg-white">
-          <!-- Tìm kiếm -->
           <h5 class="fw-bold mb-3">Tìm kiếm</h5>
           <form class="input-group mb-3" @submit.prevent>
             <input v-model="searchQuery" type="text" class="form-control" placeholder="Nhập tên sản phẩm..." />
-            <button type="button" class="btn btn-dark" @click="searchProduct">
-              <i class="fa fa-search"></i>
-            </button>
           </form>
 
-          <!-- Danh mục -->
           <h5 class="fw-bold mt-4 mb-3">Danh mục sản phẩm</h5>
           <ul class="list-unstyled sidebar-menu">
             <li v-for="value in category" :key="value.id">
@@ -92,37 +113,48 @@ watch(sortOption, () => {
         </div>
       </div>
 
-      <!-- Sản phẩm -->
       <div class="col-lg-8">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <p class="mb-0 text-muted">Hiển thị {{ products.length }} sản phẩm</p>
+          <p class="mb-0 text-muted">Hiển thị {{ filteredProducts.length }} sản phẩm</p>
           <select v-model="sortOption" class="form-select w-auto">
-            <option selected>Mặc định</option>
-            <option>Từ A đến Z</option>
-            <option>Từ Z đến A</option>
+            <option>Sắp xếp mặc định</option>
+            <option>Từ A -> Z</option>
+            <option>Từ Z -> A</option>
             <option>Giá tăng dần</option>
             <option>Giá giảm dần</option>
           </select>
         </div>
 
         <div class="row g-4">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="item in products" :key="item.id">
-              <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
-                <div class="card border-0 shadow-sm h-100">
-                  <div class="position-relative">
-                    <img :src="item.image[0]" class="card-img-top" alt="product" />
-                    <span v-if="item.discount < item.price"
-                      class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1" style="font-size: 0.8rem;">
-                      Giảm giá!
-                    </span>
-                  </div>
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="item in filteredProducts" :key="item.id">
+            <div class="card border-0 shadow-sm h-100 product-card">
+              <div class="position-relative product-image-container">
+                <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
+                  <img :src="item.image[0]" class="card-img-top" alt="product" />
+                  <span
+                    v-if="item.discount < item.price"
+                    class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1"
+                    style="font-size: 0.8rem"
+                  >
+                    Giảm giá!
+                  </span>
+                </router-link>
+                <div class="product-icons">
+                  <a href="#" @click.prevent="addToCart(item)" class="text-dark">
+                    <i class="fa fa-cart-plus"></i>
+                  </a>
+                  <a href="#" @click.prevent="toggleWishlist(item)" :class="{ 'text-danger': isInWishlist(item.id) }">
+                    <i class="fa fa-heart"></i>
+                  </a>
+                </div>
+              </div>
 
-                  <div class="card-body text-center">
+              <div class="card-body text-center">
+                 <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
                     <p class="text-secondary small mb-1">
-                      {{category.find(c => c.id === item.categoryId)?.nameCategory || 'Không có'}}
+                      {{ category.find((c) => c.id === item.categoryId)?.nameCategory || 'Không có' }}
                     </p>
                     <h6 class="fw-semibold">{{ item.name }}</h6>
-
                     <template v-if="item.discount < item.price">
                       <p class="text-muted text-decoration-line-through small mb-1">
                         {{ Number(item.price).toLocaleString('vi-VN') }} ₫
@@ -131,19 +163,18 @@ watch(sortOption, () => {
                         {{ Number(item.discount).toLocaleString('vi-VN') }} ₫
                       </p>
                     </template>
-
                     <template v-else>
                       <p class="fw-bold text-danger mb-0">
                         {{ Number(item.price).toLocaleString('vi-VN') }} ₫
                       </p>
                     </template>
-                  </div>
-                </div>
-              </router-link>
+                  </router-link>
+              </div>
             </div>
+          </div>
         </div>
 
-        <p v-if="products.length === 0" class="text-center text-muted mt-4">
+        <p v-if="filteredProducts.length === 0" class="text-center text-muted mt-4">
           Không tìm thấy sản phẩm nào
         </p>
       </div>
@@ -153,6 +184,52 @@ watch(sortOption, () => {
 </template>
 
 <style scoped>
+/* --- 6. Thêm CSS cho icon --- */
+.product-card {
+  overflow: hidden;
+}
+
+.product-image-container {
+  position: relative;
+}
+
+.product-icons {
+  position: absolute;
+  top: 10px;
+  right: -50px; /* Ẩn icon ban đầu */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: right 0.3s ease;
+}
+
+.product-card:hover .product-icons {
+  right: 10px; /* Hiện icon khi hover */
+}
+
+.product-icons a {
+  background-color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.product-icons a:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.product-icons .text-danger .fa-heart {
+  color: red;
+}
+/* --- Hết phần thêm CSS --- */
+
 .sidebar-menu li a:hover {
   color: #000;
   font-weight: 500;

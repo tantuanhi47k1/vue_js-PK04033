@@ -57,6 +57,22 @@ const addToCart = () => {
   }
 };
 
+const isInWishlist = (productId) => {
+  // Dùng getter từ store/modules/wishlist.js
+  return store.getters['wishlist/isInWishlist'](productId);
+}
+
+// Hàm thêm/xóa sản phẩm khỏi wishlist
+const toggleWishlist = (product) => {
+  if (isInWishlist(product.id)) {
+    // Nếu đã có, gọi action xóa
+    store.dispatch('wishlist/removeFromWishlist', product.id);
+  } else {
+    // Nếu chưa có, gọi action thêm
+    store.dispatch('wishlist/addToWishlist', product);
+  }
+}
+
 onMounted(() => {
   readProductDetail();
   readCategories();
@@ -127,9 +143,12 @@ watch(
             <div @click="addToCart" class="btn btn-warning px-4 py-2">
               <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
             </div>
-            <button class="btn btn-outline-danger px-4 py-2">
-              <i class="fa fa-heart me-2" style="color: red"></i>Yêu Thích
-            </button>
+            <button @click="toggleWishlist(product)" 
+                      class="btn btn-outline-danger px-4 py-2"
+                      :class="{ 'active': isInWishlist(product.id) }">
+                <i class="fa me-2" :class="isInWishlist(product.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                {{ isInWishlist(product.id) ? 'Đã Thích' : 'Yêu Thích' }}
+              </button>
           </div>
 
           <hr class="my-4" />
@@ -250,6 +269,10 @@ button.btn-outline-dark:hover {
   border-radius: 10px;
 }
 
+.btn-outline-danger.active {
+  background-color: #dc3545;
+  color: white;
+}
 
 @media (max-width: 768px) {
   .main-img {

@@ -1,4 +1,3 @@
-// src/store/modules/cart.js
 import axios from 'axios';
 
 const state = {
@@ -124,13 +123,19 @@ const actions = {
 };
 
 const getters = {
-    cartItems: state => state.cart,
-    cartTotal: state => {
-        return state.cart.reduce((total, product) => {
-            return total + product.discount * product.quantity;
-        }, 0);
-    }
+  cartItems: (state) => state.cart,
+
+  cartItemCount: (state) => {
+    return state.cart.reduce((total, item) => total + (item.quantity || 1), 0);
+  },
+
+  cartTotal: (state) => {
+    return state.cart.reduce((total, product) => {
+      return total + product.discount * product.quantity;
+    }, 0);
+  }
 };
+
 
 export default {
     namespaced: true,

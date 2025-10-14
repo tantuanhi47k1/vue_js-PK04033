@@ -1,10 +1,15 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 import axios from "axios";
 
 const router = useRouter();
 const user = ref(null);
+const store = useStore();
+
+const cartItemCount = computed(() => store.getters["cart/cartItemCount"]);
+const wishlistCount = computed(() => store.getters["wishlist/wishlist"].length);
 
 onMounted(async () => {
   const storedUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -76,21 +81,18 @@ const handleLogout = () => {
             </li>
           </ul>
 
-          <!-- Hành động bên phải -->
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-3">
             <template v-if="user">
               <span class="text-dark">
                 <i class="fa-solid fa-user" style="color: #000000"></i>
                 Xin chào 👋,
                 <b style="color: chocolate">{{ user.fullname }} !</b>
               </span>
-
               <template v-if="user.role === 'admin'">
                 <router-link to="/admin" class="btn btn-info btn-sm fw-semibold"
                   >Admin | Quản lý</router-link
                 >
               </template>
-
               <button
                 @click="handleLogout"
                 class="btn btn-outline-danger btn-sm"
@@ -98,7 +100,6 @@ const handleLogout = () => {
                 Đăng xuất
               </button>
             </template>
-
             <template v-else>
               <router-link to="/login" class="btn btn-outline-primary btn-sm"
                 >Đăng nhập</router-link
@@ -110,16 +111,26 @@ const handleLogout = () => {
               >
             </template>
 
-            <router-link to="/cart">
-              <div class="position-relative">
-                <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
-                <span
-                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  style="font-size: 10px"
-                >
-                  2
-                </span>
-              </div>
+            <router-link to="/wishlist" class="position-relative">
+              <i class="fa-solid fa-heart fs-5 text-dark"></i>
+              <span
+                v-if="wishlistCount > 0"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 10px"
+              >
+                {{ wishlistCount }}
+              </span>
+            </router-link>
+
+            <router-link to="/cart" class="position-relative">
+              <i class="fa-solid fa-cart-shopping fs-5 text-dark"></i>
+              <span
+                v-if="cartItemCount > 0"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 10px"
+              >
+                {{ cartItemCount }}
+              </span>
             </router-link>
           </div>
         </div>

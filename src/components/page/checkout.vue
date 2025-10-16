@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
@@ -17,6 +17,7 @@ const userInfo = ref({
 const paymentMethod = ref('cod');
 const couponCode = ref('');
 const discount = ref(0);
+const appliedCoupon = ref(null);
 
 const cart = computed(() => store.getters['cart/cartItems']);
 const subtotal = computed(() => store.getters['cart/cartTotal']);
@@ -35,25 +36,52 @@ onMounted(() => {
   }
 });
 
+watch(cart, () => {
+  discount.value = 0;
+  couponCode.value = '';
+  appliedCoupon.value = null;
+});
+
 const applyCoupon = async () => {
-  if (!couponCode.value) return;
+  if (!couponCode.value) {
+    Swal.fire('Cảnh báo', 'Vui lòng nhập mã giảm giá!', 'warning');
+    return;
+  }
+
   try {
     const { data: coupons } = await axios.get(`http://localhost:3000/coupons?code=${couponCode.value}`);
     const coupon = coupons[0];
 
-    if (coupon) {
-      if (coupon.discountPercent) {
-        discount.value = (subtotal.value * coupon.discountPercent) / 100;
-      } else if (coupon.discountAmount) {
-        discount.value = coupon.discountAmount;
-      }
-      Swal.fire('Thành công', 'Áp dụng mã giảm giá thành công!', 'success');
-    } else {
+    if (!coupon) {
+      Swal.fire('Lỗi', 'Mã giảm giá không hợp lệ!', 'error');
       discount.value = 0;
-      Swal.fire('Thất bại', 'Mã giảm giá không hợp lệ!', 'error');
+      return;
     }
+
+    const today = new Date().toISOString().split('T')[0];
+    if (coupon.expiry && coupon.expiry < today) {
+      Swal.fire('Hết hạn', 'Mã giảm giá này đã hết hạn!', 'warning');
+      discount.value = 0;
+      return;
+    }
+
+    if (coupon.conditions && subtotal.value < coupon.conditions) {
+      Swal.fire(
+        'Không đủ điều kiện',
+        `Đơn hàng phải từ ${coupon.conditions.toLocaleString('vi-VN')}₫ mới dùng mã này!`,
+        'info'
+      );
+      discount.value = 0;
+      return;
+    }
+
+    discount.value = Math.floor((subtotal.value * coupon.discount) / 100);
+    appliedCoupon.value = coupon;
+
+    Swal.fire('Thành công', `Áp dụng mã giảm ${coupon.discount}% thành công!`, 'success');
   } catch (err) {
     console.error('Lỗi khi áp dụng mã:', err);
+    Swal.fire('Lỗi', 'Không thể áp dụng mã giảm giá.', 'error');
   }
 };
 
@@ -65,7 +93,7 @@ const placeOrder = async () => {
 
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   const orderDetails = {
-    userId: loggedInUser.id,
+    userId: loggedInUser?.id || null,
     customerInfo: userInfo.value,
     products: cart.value,
     subtotal: subtotal.value,
@@ -73,6 +101,7 @@ const placeOrder = async () => {
     note: userInfo.value.note,
     total: total.value,
     paymentMethod: paymentMethod.value,
+    coupon: appliedCoupon.value?.code || null,
     status: 'Chờ xử lý',
     orderDate: new Date().toISOString()
   };
@@ -85,7 +114,8 @@ const placeOrder = async () => {
     Swal.fire({
       icon: 'success',
       title: 'Đặt hàng thành công!',
-      text: 'Cảm ơn bạn đã mua hàng.',
+      text: 'Cảm ơn bạn đã mua hàng tại KaynStyle 🎧',
+      confirmButtonText: 'Xem đơn hàng'
     }).then(() => {
       router.push('/ordersHistory');
     });
@@ -100,24 +130,26 @@ const placeOrder = async () => {
 <template>
   <div class="container my-5">
     <h2 class="fw-bold mb-4 text-center">Thanh Toán</h2>
+
     <div v-if="cart.length === 0" class="text-center">
-      <p>Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm để thanh toán.</p>
+      <p>🛒 Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm để thanh toán.</p>
     </div>
+
     <div v-else class="row g-5">
       <div class="col-md-7">
         <h4 class="mb-3 fw-semibold">Thông tin giao hàng</h4>
         <div class="card p-4 shadow-sm border-0">
           <div class="mb-3">
             <label class="form-label">Họ và tên</label>
-            <input type="text" v-model="userInfo.fullname" class="form-control">
+            <input type="text" v-model="userInfo.fullname" class="form-control" />
           </div>
           <div class="mb-3">
             <label class="form-label">Địa chỉ</label>
-            <input type="text" v-model="userInfo.address" class="form-control">
+            <input type="text" v-model="userInfo.address" class="form-control" />
           </div>
           <div class="mb-3">
             <label class="form-label">Số điện thoại</label>
-            <input type="tel" v-model="userInfo.phone" class="form-control">
+            <input type="tel" v-model="userInfo.phone" class="form-control" />
           </div>
           <div class="mb-3">
             <label class="form-label">Ghi chú (tùy chọn)</label>
@@ -128,16 +160,12 @@ const placeOrder = async () => {
         <h4 class="mt-4 mb-3 fw-semibold">Phương thức thanh toán</h4>
         <div class="card p-4 shadow-sm border-0">
           <div class="form-check">
-            <input class="form-check-input" type="radio" v-model="paymentMethod" value="cod" id="cod">
-            <label class="form-check-label" for="cod">
-              Thanh toán khi nhận hàng (COD)
-            </label>
+            <input class="form-check-input" type="radio" v-model="paymentMethod" value="cod" id="cod" />
+            <label class="form-check-label" for="cod">Thanh toán khi nhận hàng (COD)</label>
           </div>
           <div class="form-check mt-2">
-            <input class="form-check-input" type="radio" v-model="paymentMethod" value="vnpay" id="vnpay" disabled>
-            <label class="form-check-label" for="vnpay">
-              VNPAY (Đang phát triển)
-            </label>
+            <input class="form-check-input" type="radio" v-model="paymentMethod" value="vnpay" id="vnpay" disabled />
+            <label class="form-check-label text-muted" for="vnpay">VNPAY (Đang phát triển)</label>
           </div>
         </div>
       </div>
@@ -149,29 +177,53 @@ const placeOrder = async () => {
             <span>{{ item.name }} x {{ item.quantity }}</span>
             <span>{{ (item.discount * item.quantity).toLocaleString('vi-VN') }} ₫</span>
           </div>
-          <hr>
+          <hr />
           <div class="d-flex justify-content-between mb-2">
             <strong>Tạm tính</strong>
             <strong>{{ subtotal.toLocaleString('vi-VN') }} ₫</strong>
           </div>
-          <div class="d-flex justify-content-between text-success mb-2" v-if="discount > 0">
-            <strong>Giảm giá</strong>
+
+          <div v-if="discount > 0" class="d-flex justify-content-between text-success mb-2">
+            <strong>Giảm giá ({{ appliedCoupon?.code }})</strong>
             <strong>- {{ discount.toLocaleString('vi-VN') }} ₫</strong>
           </div>
-          <hr>
+
+          <hr />
           <div class="d-flex justify-content-between fw-bold fs-5">
             <span>Tổng cộng</span>
             <span class="text-danger">{{ total.toLocaleString('vi-VN') }} ₫</span>
           </div>
+
           <div class="input-group mt-4">
-            <input type="text" v-model="couponCode" class="form-control" placeholder="Nhập mã khuyến mãi">
+            <input
+              type="text"
+              v-model="couponCode"
+              class="form-control"
+              placeholder="Nhập mã giảm giá"
+            />
             <button @click="applyCoupon" class="btn btn-dark">Áp dụng</button>
           </div>
+
           <button @click="placeOrder" class="btn btn-success w-100 mt-3 fw-bold py-2">
-            ĐẶT HÀNG
+            ĐẶT HÀNG NGAY
           </button>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+h2 {
+  color: #222;
+}
+.card {
+  border-radius: 12px;
+}
+.btn {
+  border-radius: 8px;
+}
+.text-danger {
+  font-weight: bold;
+}
+</style>

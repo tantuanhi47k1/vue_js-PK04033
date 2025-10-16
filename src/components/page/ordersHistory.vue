@@ -75,16 +75,22 @@ const buyAgain = (order) => {
       store.dispatch('cart/addToCart', {
         id: product.id,
         name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: product.quantity
+        category: product.category || '',
+        price: product.price || product.discount,
+        discount: product.discount || product.price,
+        image: Array.isArray(product.image) ? product.image : [product.image],
+        quantity: product.quantity || 1
       });
     });
+
     Swal.fire({
       icon: 'success',
-      title: 'Thành công',
-      text: 'Sản phẩm đã được thêm lại vào giỏ hàng!'
+      title: 'Thành công!',
+      text: 'Tất cả sản phẩm đã được thêm lại vào giỏ hàng.',
+      timer: 2000,
+      showConfirmButton: false
     });
+
     router.push('/cart');
   }
 };

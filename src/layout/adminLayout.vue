@@ -26,7 +26,10 @@
                     <li class="nav-item">
                         <RouterLink to="/admin/orders" class="nav-link">⚙️ QLý Đơn Hàng</RouterLink>
                     </li>
-                </ul>
+                    <li class="nav-item">
+                        <RouterLink to="/admin/CRUDcoupons" class="nav-link">🎫 Mã Giảm Giá</RouterLink>
+                    </li>
+                </ul>   
 
                 <div class="mt-auto text-center pt-4 border-top border-secondary">
                     <router-link to="/" class="btn btn-outline-light btn-sm w-100">

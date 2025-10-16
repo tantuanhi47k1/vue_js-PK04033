@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 
 const category = ref([]);
 const products = ref([]);
+const coupons = ref([]); // Thêm biến để lưu danh sách coupon
 const store = useStore();
 
 const scrollContainer = ref(null);
@@ -38,6 +39,16 @@ const readProduct = async () => {
   }
 };
 
+// Hàm mới: Lấy danh sách coupon
+const readCoupons = async () => {
+  try {
+    const res = await axios.get('http://localhost:3000/coupons');
+    coupons.value = res.data;
+  } catch (err) {
+    console.error('Lỗi khi tải mã giảm giá:', err);
+  }
+};
+
 const addToCart = (product) => {
   store.dispatch('cart/addProductToCart', product)
   Swal.fire({
@@ -50,9 +61,31 @@ const addToCart = (product) => {
   })
 }
 
+// Hàm mới: Sao chép mã coupon
+const copyCoupon = (code) => {
+  navigator.clipboard.writeText(code).then(() => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Đã sao chép!',
+      text: `Mã giảm giá ${code} đã được sao chép.`,
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }).catch(err => {
+    console.error('Không thể sao chép: ', err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi!',
+      text: 'Không thể sao chép mã giảm giá.',
+    });
+  });
+};
+
+
 onMounted(() => {
   readCategory();
   readProduct();
+  readCoupons(); // Gọi hàm để lấy coupon
 });
 </script>
 
@@ -70,6 +103,31 @@ onMounted(() => {
         class="overlay position-absolute w-100 h-100"
         style="background: rgba(0, 0, 0, 0.55)"
       ></div>
+    </section>
+
+    <section class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-uppercase mb-2">Mã Giảm Giá Hấp Dẫn</h2>
+            <p class="text-muted">
+                Lưu lại mã để sử dụng cho lần mua sắm tiếp theo!
+            </p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4" v-for="coupon in coupons" :key="coupon.id">
+                <div class="coupon-card card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary fw-bold">{{ coupon.title }}</h5>
+                        <p class="card-text mb-2">Giảm: <strong class="text-danger">{{ coupon.discount }}%</strong></p>
+                        <p class="card-text mb-2">Đơn tối thiểu: <strong>{{ Number(coupon.conditions).toLocaleString('vi-VN') }} ₫</strong></p>
+                        <p class="card-text mb-auto">Hết hạn: <strong class="text-muted">{{ coupon.expiry }}</strong></p>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <span class="coupon-code"><strong>{{ coupon.code }}</strong></span>
+                            <button @click="copyCoupon(coupon.code)" class="btn btn-sm btn-outline-primary">Sao chép mã</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <section class="container my-5">
@@ -172,24 +230,22 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* CSS CŨ CỦA BẠN (GIỮ NGUYÊN) */
 .hero {
   position: relative;
   background: url("https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=1600&q=80")
     center/cover no-repeat;
   height: 80vh;
 }
-
 .hero .overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
 }
-
 .hero .content {
   position: relative;
   z-index: 2;
 }
-
 .scroll-btn {
   position: absolute;
   top: 45%;
@@ -204,53 +260,42 @@ onMounted(() => {
   transition: 0.3s;
   z-index: 5;
 }
-
 .scroll-btn:hover {
   background: #000;
   transform: translateY(-50%) scale(1.1);
 }
-
 .scroll-btn.left {
   left: -10px;
 }
-
 .scroll-btn.right {
   right: -10px;
 }
-
-/* CATEGORY */
 .category-scroll {
   scroll-behavior: smooth;
   scrollbar-width: none;
 }
-
 .category-scroll::-webkit-scrollbar {
   display: none;
 }
-
 .category-item {
   width: 260px;
 }
-
 .image-wrapper {
   position: relative;
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
-
 .image-wrapper img {
   width: 100%;
   height: 220px;
   object-fit: cover;
   transition: transform 0.4s ease, filter 0.3s ease;
 }
-
 .image-wrapper:hover img {
   transform: scale(1.08);
   filter: brightness(0.7);
 }
-
 .overlay {
   position: absolute;
   inset: 0;
@@ -262,12 +307,9 @@ onMounted(() => {
   opacity: 0;
   transition: opacity 0.4s ease;
 }
-
 .image-wrapper:hover .overlay {
   opacity: 1;
 }
-
-/* PRODUCT */
 .product-card {
   border-radius: 12px;
   overflow: hidden;
@@ -275,13 +317,10 @@ onMounted(() => {
   background: #fff;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
-
 .product-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
-
-/* Ảnh sản phẩm */
 .product-card img {
   width: 100%;
   height: 260px;
@@ -289,38 +328,28 @@ onMounted(() => {
   transition: transform 0.4s ease;
   border-bottom: 1px solid #f1f1f1;
 }
-
 .product-card:hover img {
   transform: scale(1.07);
 }
-
-/* Tên sản phẩm */
 .product-card h6 {
   color: #222;
   font-size: 1rem;
   margin-bottom: 6px;
   transition: color 0.3s ease;
 }
-
 .product-card:hover h6 {
   color: #007bff; /* xanh nước biển */
 }
-
-/* Giá */
 .product-card p {
   margin: 0;
 }
-
 .product-card .text-muted {
   color: #999 !important;
 }
-
 .product-card .fw-bold {
   font-size: 1rem;
   color: #007bff; /* xanh nước biển cho giá giảm */
 }
-
-/* Nút thêm vào giỏ */
 .product-card .btn {
   background-color: #007bff !important; /* xanh nước biển */
   border: none;
@@ -330,16 +359,33 @@ onMounted(() => {
   padding: 6px 14px;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-
 .product-card .btn:hover {
   background-color: #0056b3 !important; /* đậm hơn khi hover */
   transform: scale(1.05);
 }
-
-/* GENERAL */
 section h2 {
   color: #111;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+/* CSS MỚI CHO COUPON */
+.coupon-card {
+    background-color: #f8f9fa;
+    border: 1px dashed #007bff;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+.coupon-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    border-color: #0056b3;
+}
+.coupon-code {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 1px;
 }
 </style>

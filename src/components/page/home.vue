@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 
 const category = ref([]);
 const products = ref([]);
-const coupons = ref([]); // Thêm biến để lưu danh sách coupon
+const coupons = ref([]);
 const store = useStore();
 
 const scrollContainer = ref(null);
@@ -39,7 +39,6 @@ const readProduct = async () => {
   }
 };
 
-// Hàm mới: Lấy danh sách coupon
 const readCoupons = async () => {
   try {
     const res = await axios.get('http://localhost:3000/coupons');
@@ -61,7 +60,7 @@ const addToCart = (product) => {
   })
 }
 
-// Hàm mới: Sao chép mã coupon
+// copy mã giảm giá
 const copyCoupon = (code) => {
   navigator.clipboard.writeText(code).then(() => {
     Swal.fire({
@@ -85,7 +84,7 @@ const copyCoupon = (code) => {
 onMounted(() => {
   readCategory();
   readProduct();
-  readCoupons(); // Gọi hàm để lấy coupon
+  readCoupons();
 });
 </script>
 
@@ -95,7 +94,7 @@ onMounted(() => {
       class="hero position-relative d-flex align-items-center justify-content-center text-center text-white"
     >
       <img
-        src="https://phukienvang.com/wp-content/uploads/2023/10/banner-tai-nghe-marshall-pkvaudio.jpg"
+        src="/banner figma.jpg"
         class="position-absolute w-100 h-100 object-fit-cover"
         alt="banner"
       />
@@ -107,9 +106,9 @@ onMounted(() => {
 
     <section class="container my-5">
         <div class="text-center mb-5">
-            <h2 class="fw-bold text-uppercase mb-2">Mã Giảm Giá Hấp Dẫn</h2>
+            <h2 class="fw-bold text-uppercase mb-2">Mã Giảm Giá Hấp Dẫn 🎟️</h2>
             <p class="text-muted">
-                Lưu lại mã để sử dụng cho lần mua sắm tiếp theo!
+                Giảm giá chớp nhoáng — bỏ lỡ là tiếc cả tháng!
             </p>
         </div>
         <div class="row g-4 justify-content-center">

@@ -29,6 +29,9 @@
                     <li class="nav-item">
                         <RouterLink to="/admin/CRUDcoupons" class="nav-link">🎫 Mã Giảm Giá</RouterLink>
                     </li>
+                    <li class="nav-item">
+                        <router-link to="/admin/statistics" class="nav-link">Thông Kê</router-link>
+                    </li>
                 </ul>   
 
                 <div class="mt-auto text-center pt-4 border-top border-secondary">

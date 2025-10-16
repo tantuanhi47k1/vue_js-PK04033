@@ -25,6 +25,18 @@ onMounted(async () => {
   }
 });
 
+onMounted(() => {
+  const navbar = document.querySelector(".custom-navbar");
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) {
+      navbar.classList.add("sticky-active");
+    } else {
+      navbar.classList.remove("sticky-active");
+    }
+  });
+});
+
+
 const handleLogout = () => {
   localStorage.removeItem("loggedInUser");
   user.value = null;
@@ -320,6 +332,23 @@ body {
 
 .footer-bottom {
   background-color: #f0f0f0;
+}
+
+/* ======= STICKY HEADER FIX ======= */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1050;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+/* Hiệu ứng khi cuộn */
+.sticky-active {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 

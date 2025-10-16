@@ -24,7 +24,7 @@ const formatPrice = (price) => {
 
 <template>
   <div class="container my-5">
-    <h2 class="mb-4" style="text-align: center;">Sản phẩm yêu thích ♥</h2>
+    <h2 class="mb-4" style="text-align: center; margin-top: 130px;">Sản phẩm yêu thích 💖</h2>
 
     <div v-if="wishlist.length === 0" class="text-center mt-5">
       <p class="fs-5">Danh sách yêu thích của bạn đang trống.</p>
@@ -33,7 +33,7 @@ const formatPrice = (price) => {
 
     <div v-else class="row g-4">
       <div class="col-md-3" v-for="product in wishlist" :key="product.id">
-        <div class="card h-100 shadow-sm border-0">
+        <div class="card h-100 shadow-sm border-0" style="margin-top: 20px;">
           <router-link :to="`/productDetail/${product.id}`">
             <img :src="product.image[0]" class="card-img-top" :alt="product.name" style="height: 250px; object-fit: cover;">
           </router-link>

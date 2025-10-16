@@ -43,7 +43,7 @@ const deleteAllCart = () => {
 
 <template>
   <div class="container my-5">
-    <h2 class="fw-bold mb-4 text-center">🛒 Giỏ hàng</h2>
+    <h2 class="fw-bold mb-4 text-center" style="margin-top: 150px;">🛒 Giỏ hàng</h2>
 
     <div class="text-center text-muted py-5" v-if="!cart.length">
       <i class="fa fa-shopping-cart fa-3x mb-3" style="color: aqua"></i>
@@ -55,7 +55,7 @@ const deleteAllCart = () => {
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-0">
-            <table class="table align-middle mb-0">
+            <table class="table align-middle mb-0" style="margin-top: 10px;">
               <thead class="table-dark text-center">
                 <tr>
                   <th>Sản Phẩm</th>

@@ -94,6 +94,9 @@ const team = ref([
 </script>
 
 <style scoped>
+.text-center.mb-5{
+  margin-top: 120px;
+}
 img {
   object-fit: cover;
 }

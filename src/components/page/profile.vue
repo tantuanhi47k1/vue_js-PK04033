@@ -201,6 +201,7 @@ const saveChanges = async () => {
 <style scoped>
 .profile-card {
   background: #fff;
+  margin-top: 60px;
 }
 
 img {

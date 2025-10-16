@@ -100,7 +100,7 @@ const toggleWishlist = (product) => {
 
 <template>
   <div class="container-fluid my-5">
-    <div class="row">
+    <div class="row" style="margin-top: 130px;">
       <div class="col-lg-1 mb-4"></div>
       <div class="col-lg-2 mb-4">
         <div class="p-3 border rounded shadow-sm bg-white">

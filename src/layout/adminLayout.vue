@@ -24,13 +24,13 @@
                         </router-link>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/admin/orders" class="nav-link">⚙️ QLý Đơn Hàng</RouterLink>
+                        <RouterLink to="/admin/orders" class="nav-link" active-class="active-link">⚙️ QLý Đơn Hàng</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/admin/CRUDcoupons" class="nav-link">🎫 Mã Giảm Giá</RouterLink>
+                        <RouterLink to="/admin/CRUDcoupons" class="nav-link" active-class="active-link">🎫 Mã Giảm Giá</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/admin/statistics" class="nav-link">Thông Kê</router-link>
+                        <router-link to="/admin/statistics" class="nav-link" active-class="active-link">📊 Thông Kê</router-link>
                     </li>
                 </ul>   
 

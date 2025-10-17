@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import axios from "axios";
 import { Bar } from "vue-chartjs";
 import {
@@ -15,45 +15,68 @@ import {
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const orders = ref([]);
+const chartData = ref(null);
+
 const totalOrders = computed(() => orders.value.length);
 const totalRevenue = computed(() =>
-  orders.value.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0)
+  orders.value.reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
 );
 
-const chartData = ref({
-  labels: [],
-  datasets: [
-    {
-      label: "Doanh thu (VNĐ)",
-      data: [],
-      backgroundColor: "rgba(54, 162, 235, 0.6)",
-    },
-  ],
-});
-
-const chartOptions = {
+const chartOptions = ref({
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: { position: "top" },
     title: { display: true, text: "Thống kê doanh thu theo ngày" },
   },
-};
+  layout: {
+    padding: { left: 0, right: 0, top: 10, bottom: 0 }, // sát trái
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: { font: { size: 12 } },
+      grid: { drawBorder: false },
+    },
+    x: {
+      ticks: { font: { size: 12 } },
+      grid: { drawBorder: false },
+      offset: false, // bỏ khoảng trống 2 bên
+    },
+  },
+});
 
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost/api/orders.php");
+    const response = await axios.get("http://localhost:3000/orders");
     orders.value = response.data || [];
 
     // Gom doanh thu theo ngày
     const revenueByDate = {};
     orders.value.forEach((order) => {
-      const date = new Date(order.created_at).toLocaleDateString("vi-VN");
+      const date = new Date(order.orderDate).toLocaleDateString("vi-VN");
       revenueByDate[date] =
-        (revenueByDate[date] || 0) + parseFloat(order.total_price || 0);
+        (revenueByDate[date] || 0) + parseFloat(order.total || 0);
     });
 
-    chartData.value.labels = Object.keys(revenueByDate);
-    chartData.value.datasets[0].data = Object.values(revenueByDate);
+    // Gán dữ liệu cho biểu đồ
+    chartData.value = {
+      labels: Object.keys(revenueByDate),
+      datasets: [
+        {
+          label: "Doanh thu (VNĐ)",
+          data: Object.values(revenueByDate),
+          backgroundColor: "rgba(54, 162, 235, 0.8)",
+          borderRadius: 6,
+          barThickness: 15, // 👈 cột mảnh hơn
+          maxBarThickness: 20,
+          categoryPercentage: 0.6, // giảm độ rộng nhóm
+          barPercentage: 0.6, // giảm độ rộng từng cột
+        },
+      ],
+    };
+
+    await nextTick();
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu:", error);
   }
@@ -75,15 +98,16 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="chart-wrapper">
+    <div class="chart-wrapper" v-if="chartData">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
+    <p v-else class="text-muted">⏳ Đang tải biểu đồ...</p>
   </div>
 </template>
 
 <style scoped>
 .dashboard-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 40px auto;
   text-align: center;
   font-family: "Poppins", sans-serif;
@@ -92,7 +116,7 @@ onMounted(async () => {
 .dashboard-title {
   font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .summary-cards {
@@ -123,10 +147,17 @@ onMounted(async () => {
   color: #007bff;
 }
 
+/* 👇 Biểu đồ rộng, nhưng cột mảnh và nằm sát trái */
 .chart-wrapper {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  height: 400px;
+  width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-start; /* sát trái */
+  align-items: center;
 }
 </style>

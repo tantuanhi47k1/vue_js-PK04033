@@ -97,7 +97,8 @@ watch(
 
 <template>
   <div v-if="product" class="container my-5">
-    <div class="row g-4">
+    <div class="row g-4" style="margin-top: 120px;">
+      <h2 style="text-align: center;">Chi Tiết Sản Phẩm</h2>
       <div class="col-md-6">
         <div class="border rounded p-3 bg-white shadow-sm">
           <img

@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { RouterLink } from "vue-router";
+import Swal from "sweetalert2";
 
 const store = useStore();
 
@@ -22,22 +23,53 @@ const increase = (item) => {
 };
 
 const deleteCartItem = (itemId) => {
-  const isConfirm = confirm(
-    "Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?"
-  );
-  if (isConfirm) {
-    store.dispatch("cart/deleteCart", itemId);
-    alert("Đã xoá sản phẩm khỏi giỏ hàng!");
-  }
+  Swal.fire({
+    title: 'Xác nhận xoá!',
+    text: 'Xoá sản phẩm này khỏi giỏ hàng?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#000',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Xóa',
+    cancelButtonText: 'Hủy'
+}).then(async (result) => {
+    if (result.isConfirmed) {
+      store.dispatch("cart/deleteCart", itemId);
+    Swal.fire({
+      icon: "success",
+      title: "Xoá sản phẩm thành công!",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+        Swal.fire(
+            'Deleted!',
+            'Xoá sản phẩm thành công.',
+            'success'
+        )
+    }
+});
 };
 
 const deleteAllCart = () => {
-  const isConfirmAll = confirm(
-    "Bạn có chắc chắn muốn xoá tất cả sản phẩm khỏi giỏ hàng?"
-  );
-  if (isConfirmAll) {
-    store.dispatch("cart/deleteAllCart");
-  }
+  Swal.fire({
+    title: 'Bạn có chắc chắn muốn xoá tất cả sản phẩm khỏi giỏ hàng?',
+    text: "Toàn bộ sản phẩm trong giỏ hàng sẽ bị xóa vĩnh viễn.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#000',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Xoá tất cả',
+    cancelButtonText: 'Huỷ'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      store.dispatch("cart/deleteAllCart");
+      Swal.fire(
+        'Đã xoá!',
+        'Tất cả sản phẩm đã được xoá khỏi giỏ hàng.',
+        'success'
+      )
+    }
+  })
 };
 </script>
 

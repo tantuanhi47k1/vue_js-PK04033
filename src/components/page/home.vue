@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 const category = ref([]);
 const products = ref([]);
 const coupons = ref([]);
+const bestSellingProducts = ref([]);
 const store = useStore();
 
 const scrollContainer = ref(null);
@@ -48,6 +49,47 @@ const readCoupons = async () => {
   }
 };
 
+const readBestSellingProducts = async () => {
+  try {
+    const [ordersRes, productsRes] = await Promise.all([
+      axios.get("http://localhost:3000/orders"),
+      axios.get("http://localhost:3000/products"),
+    ]);
+
+    const orders = ordersRes.data;
+    const productsData = productsRes.data;
+    const productQuantity = {};
+
+    orders.forEach(order => {
+      if (Array.isArray(order.products)) {
+        order.products.forEach(product => {
+          const pid = product.productId ?? product.id; 
+          const qty = product.quantity ?? product.qty ?? 1;
+
+          if (!pid) return;
+
+          productQuantity[pid] = (productQuantity[pid] || 0) + qty;
+        });
+      }
+    });
+
+    const sortedPIDs = Object.keys(productQuantity).sort(
+      (a, b) => productQuantity[b] - productQuantity[a]
+    );
+
+    bestSellingProducts.value = sortedPIDs
+      .slice(0, 5)
+      .map(pid => productsData.find(p => String(p.id) === String(pid)))
+      .filter(p => p);
+
+    console.log("Top 5 bán chạy:", bestSellingProducts.value);
+
+  } catch (err) {
+    console.error("Error load best selling products:", err);
+  }
+};
+
+
 const addToCart = (product) => {
   store.dispatch('cart/addProductToCart', product)
   Swal.fire({
@@ -85,6 +127,7 @@ onMounted(() => {
   readCategory();
   readProduct();
   readCoupons();
+  readBestSellingProducts();
 });
 </script>
 
@@ -161,6 +204,70 @@ onMounted(() => {
         </div>
       </div>
     </section>
+    
+    <section class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold text-uppercase mb-2">Top 5 Sản Phẩm Bán Chạy 🔥</h2>
+    <p class="text-muted">
+      Những sản phẩm được yêu thích và mua nhiều nhất
+    </p>
+  </div>
+
+  <div class="best-selling-container position-relative">
+    <button class="scroll-btn left" @click="scrollProductLeft">‹</button>
+    <div class="best-selling-scroll" ref="productScroll">
+      <div
+        class="best-selling-item"
+        v-for="item in bestSellingProducts"
+        :key="item.id"
+      >
+        <div class="card border-0 shadow-sm h-100 product-card">
+          <router-link
+            :to="`/productDetail/${item.id}`"
+            class="text-decoration-none text-dark"
+          >
+            <div class="position-relative">
+              <img
+                :src="item.image[0]"
+                class="w-100"
+                style="height: 260px; object-fit: cover"
+              />
+              <span
+                v-if="item.discount < item.price"
+                class="badge bg-danger position-absolute top-0 start-0 m-2"
+              >-{{ Math.round(100 - (item.discount / item.price) * 100) }}%</span>
+            </div>
+            <div class="card-body text-center">
+              <h6 class="fw-semibold mb-1">{{ item.name }}</h6>
+              <template v-if="item.discount < item.price">
+                <p class="text-muted text-decoration-line-through small mb-0">
+                  {{ Number(item.price).toLocaleString("vi-VN") }} ₫
+                </p>
+                <p class="fw-bold text-danger mb-1">
+                  {{ Number(item.discount).toLocaleString("vi-VN") }} ₫
+                </p>
+              </template>
+              <template v-else>
+                <p class="fw-bold text-danger mb-1">
+                  {{ Number(item.price).toLocaleString("vi-VN") }} ₫
+                </p>
+              </template>
+            </div>
+          </router-link>
+          <div class="text-center pb-3">
+            <button @click="addToCart(item)"
+              class="btn btn-dark btn-sm rounded-pill mt-2"
+            >
+              Thêm vào giỏ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="scroll-btn right" @click="scrollProductRight">›</button>
+  </div>
+</section>
+
 
     <section class="container my-5">
       <div class="text-center mb-5">
@@ -387,4 +494,59 @@ section h2 {
     font-family: 'Courier New', Courier, monospace;
     letter-spacing: 1px;
 }
+
+.best-selling-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.best-selling-scroll {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 10px;
+}
+
+.best-selling-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.best-selling-item {
+  flex: 0 0 250px; /* mỗi item rộng 250px */
+}
+
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 5;
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.scroll-btn:hover {
+  background: #000;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-btn.left {
+  left: -20px;
+}
+
+.scroll-btn.right {
+  right: -20px;
+}
+
 </style>

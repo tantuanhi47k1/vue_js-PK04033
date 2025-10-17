@@ -216,7 +216,7 @@ const handleLogout = () => {
             <li>
               <a href="#" class="text-decoration-none">Điều khoản dịch vụ</a>
             </li>
-            <li><a href="#" class="text-decoration-none">Liên hệ</a></li>
+            <li><router-link to="/contact" class="text-decoration-none">Liên hệ</router-link></li>
           </ul>
         </div>
 

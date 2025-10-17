@@ -17,10 +17,22 @@ const readUser = async () => {
   }
 }
 
-const removeUser = async (id) => {
+// === START: PHẦN ĐÃ CẬP NHẬT ===
+const removeUser = (user) => {
+  // Kiểm tra nếu role là 'admin' thì không cho xóa
+  if (user.role === 'admin') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Không thể xoá!',
+      text: 'Bạn không được phép xoá tài khoản Admin.',
+      confirmButtonColor: '#000'
+    });
+    return; // Dừng hàm tại đây
+  }
+
   Swal.fire({
     title: 'Bạn có chắc chắn muốn xoá?',
-    text: `User có ID: ${id} sẽ bị xoá vĩnh viễn!`,
+    text: `User "${user.fullname}" sẽ bị xoá vĩnh viễn!`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Xoá',
@@ -30,12 +42,12 @@ const removeUser = async (id) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/user/${id}`)
-        users.value = users.value.filter(u => u.id !== id)
+        await axios.delete(`http://localhost:3000/user/${user.id}`)
+        users.value = users.value.filter(u => u.id !== user.id)
         Swal.fire({
           icon: 'success',
           title: 'Đã xoá!',
-          text: `User ${id} đã bị xoá khỏi hệ thống.`,
+          text: `User ${user.fullname} đã bị xoá khỏi hệ thống.`,
           confirmButtonColor: '#000'
         })
       } catch (err) {
@@ -44,6 +56,7 @@ const removeUser = async (id) => {
     }
   })
 }
+// === END: PHẦN ĐÃ CẬP NHẬT ===
 
 const createUser = async () => {
   if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone || !formUser.value.address || !formUser.value.role || !formUser.value.password) {
@@ -127,7 +140,6 @@ onMounted(readUser)
         </button>
       </div>
 
-      <!-- Bảng danh sách -->
       <div class="table-responsive">
         <table class="table align-middle table-hover text-center">
           <thead class="table-dark">
@@ -160,10 +172,11 @@ onMounted(readUser)
                 <button @click="editUser(items)" class="btn btn-outline-warning btn-sm me-2">
                   <i class="fa fa-edit"></i>
                 </button>
-                <button @click="removeUser(items.id)" class="btn btn-outline-danger btn-sm">
+                <button @click="removeUser(items)" class="btn btn-outline-danger btn-sm"
+                  :disabled="items.role === 'admin'">
                   <i class="fa fa-trash"></i>
                 </button>
-              </td>
+                </td>
             </tr>
             <tr v-else>
               <td colspan="7" class="text-center text-muted py-4">
@@ -174,7 +187,6 @@ onMounted(readUser)
         </table>
       </div>
 
-      <!-- Form thêm/sửa -->
       <div class="border-top pt-4 mt-4">
         <h5 class="fw-bold mb-3">
           {{ isEditing ? 'Sửa thông tin người dùng' : 'Thêm người dùng mới' }}
@@ -191,7 +203,8 @@ onMounted(readUser)
             </div>
             <div class="col-md-6">
               <label class="form-label">Số điện thoại</label>
-              <input v-model="formUser.phone" type="text" class="form-control" placeholder="Nhập số điện thoại" />
+              <input v-model="formUser.phone" type="text" class="form-control"
+                placeholder="Nhập số điện thoại" />
             </div>
             <div class="col-md-6">
               <label class="form-label">Địa chỉ</label>
@@ -199,7 +212,8 @@ onMounted(readUser)
             </div>
             <div class="col-md-6">
               <label class="form-label">Mật khẩu</label>
-              <input v-model="formUser.password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+              <input v-model="formUser.password" type="password" class="form-control"
+                placeholder="Nhập mật khẩu" />
             </div>
             <div class="col-md-6">
               <label class="form-label">Quyền</label>

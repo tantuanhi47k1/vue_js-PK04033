@@ -12,7 +12,15 @@ onMounted(() => {
 
 const cart = computed(() => store.getters["cart/cartItems"]);
 const subtotal = computed(() => store.getters["cart/cartTotal"]);
-const total = computed(() => store.getters["cart/cartTotal"]);
+
+const FREE_SHIP_THRESHOLD = 2000000;
+const SHIPPING_FEE = 50000;
+
+const isFreeShipping = computed(() => subtotal.value >= FREE_SHIP_THRESHOLD);
+
+const total = computed(() =>
+  isFreeShipping.value ? subtotal.value : subtotal.value + SHIPPING_FEE
+);
 
 const decrease = (item) => {
   store.dispatch("cart/decreaseQuantity", item.id);
@@ -24,58 +32,49 @@ const increase = (item) => {
 
 const deleteCartItem = (itemId) => {
   Swal.fire({
-    title: 'Xác nhận xoá!',
-    text: 'Xoá sản phẩm này khỏi giỏ hàng?',
-    icon: 'warning',
+    title: "Xác nhận xoá!",
+    text: "Xoá sản phẩm này khỏi giỏ hàng?",
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#000',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Xóa',
-    cancelButtonText: 'Hủy'
-}).then(async (result) => {
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Xóa",
+    cancelButtonText: "Hủy",
+  }).then(async (result) => {
     if (result.isConfirmed) {
       store.dispatch("cart/deleteCart", itemId);
-    Swal.fire({
-      icon: "success",
-      title: "Xoá sản phẩm thành công!",
-      showConfirmButton: false,
-      timer: 1500,
-    });
-        Swal.fire(
-            'Deleted!',
-            'Xoá sản phẩm thành công.',
-            'success'
-        )
+      Swal.fire({
+        icon: "success",
+        title: "Xoá sản phẩm thành công!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
-});
+  });
 };
 
 const deleteAllCart = () => {
   Swal.fire({
-    title: 'Bạn có chắc chắn muốn xoá tất cả sản phẩm khỏi giỏ hàng?',
+    title: "Bạn có chắc chắn muốn xoá tất cả sản phẩm khỏi giỏ hàng?",
     text: "Toàn bộ sản phẩm trong giỏ hàng sẽ bị xóa vĩnh viễn.",
-    icon: 'warning',
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#000',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Xoá tất cả',
-    cancelButtonText: 'Huỷ'
+    confirmButtonColor: "#000",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Xoá tất cả",
+    cancelButtonText: "Huỷ",
   }).then((result) => {
     if (result.isConfirmed) {
       store.dispatch("cart/deleteAllCart");
-      Swal.fire(
-        'Đã xoá!',
-        'Tất cả sản phẩm đã được xoá khỏi giỏ hàng.',
-        'success'
-      )
+      Swal.fire("Đã xoá!", "Tất cả sản phẩm đã được xoá khỏi giỏ hàng.", "success");
     }
-  })
+  });
 };
 </script>
 
 <template>
   <div class="container my-5">
-    <h2 class="fw-bold mb-4 text-center" style="margin-top: 150px;">🛒 Giỏ hàng</h2>
+    <h2 class="fw-bold mb-4 text-center" style="margin-top: 150px">🛒 Giỏ hàng</h2>
 
     <div class="text-center text-muted py-5" v-if="!cart.length">
       <i class="fa fa-shopping-cart fa-3x mb-3" style="color: aqua"></i>
@@ -87,7 +86,7 @@ const deleteAllCart = () => {
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-0">
-            <table class="table align-middle mb-0" style="margin-top: 10px;">
+            <table class="table align-middle mb-0" style="margin-top: 10px">
               <thead class="table-dark text-center">
                 <tr>
                   <th>Sản Phẩm</th>
@@ -179,6 +178,7 @@ const deleteAllCart = () => {
         </div>
       </div>
 
+      <!-- Thông tin đơn hàng -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
           <div class="card-body">
@@ -189,14 +189,19 @@ const deleteAllCart = () => {
             </div>
             <div class="d-flex justify-content-between mb-2">
               <span>Phí vận chuyển</span>
-              <span class="text-success">Miễn phí</span>
+              <span :class="isFreeShipping ? 'text-success' : 'text-danger'">
+                {{ isFreeShipping ? 'Miễn phí' : SHIPPING_FEE.toLocaleString('vi-VN') + ' ₫' }}
+              </span>
             </div>
+            <p v-if="isFreeShipping" class="text-success small mt-2">
+              🎉 Đơn hàng trên 2.000.000₫ được <b>miễn phí vận chuyển</b>!
+            </p>
             <hr />
             <div class="d-flex justify-content-between fw-bold">
               <span>Tổng cộng</span>
-              <span class="text-danger"
-                >{{ total.toLocaleString("vi-VN") }} ₫</span
-              >
+              <span class="text-danger">
+                {{ total.toLocaleString("vi-VN") }} ₫
+              </span>
             </div>
             <RouterLink
               to="/checkout"
@@ -236,6 +241,4 @@ input[type="number"] {
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
-
-
 </style>

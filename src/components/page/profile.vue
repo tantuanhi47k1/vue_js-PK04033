@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -31,6 +31,19 @@ onMounted(() => {
     });
   }
 });
+
+watch(
+  () => user.value.sex,
+  (newSex) => {
+    if (newSex === "Nu") {
+      user.value.image = "/avt-nu.jpg";
+    } else if (newSex === "Nam") {
+      user.value.image = "/avt-nam.jpg";
+    } else if (newSex === "BeDe") {
+      user.value.image = "/avt-bd.jpg";
+    }
+  }
+);
 
 const saveChanges = async () => {
   try {
@@ -64,10 +77,7 @@ const saveChanges = async () => {
       <div class="d-flex align-items-center gap-4 flex-wrap">
         <div class="text-center flex-shrink-0">
           <img
-            :src="
-              user.image ||
-              'https://scontent.fbmv1-1.fna.fbcdn.net/v/t39.30808-6/509356676_2174215323040917_4670940307410756592_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ELdGa6SjYUwQ7kNvwFxhi4s&_nc_oc=AdmVLX7FI6sSwx0MU5AgO770JlRbJrg_qV28KoyP-hpwFw61iuQM3xU6GA9Ll1duO4k&_nc_zt=23&_nc_ht=scontent.fbmv1-1.fna&_nc_gid=lpkRY_3I7Zq1g728abNm1w&oh=00_AffVpOtMbMq-GKa5zEoHIhGw-071xf-nACy7YIKSdTMwjw&oe=68F293FE'
-            "
+            :src="user.image || '/avt-nam.jpg'"
             alt="avatar"
             class="rounded-circle border shadow-sm"
             width="140"
@@ -77,30 +87,32 @@ const saveChanges = async () => {
             <button class="btn btn-outline-dark btn-sm px-3">
               <i class="fa fa-camera me-2"></i>Thay đổi avt
             </button>
-            <router-link to="/ordersHistory" class="btn btn-outline-success btn-sm px-3">
+            <router-link
+              to="/ordersHistory"
+              class="btn btn-outline-success btn-sm px-3"
+            >
               <i class="fa fa-clock me-2"></i>Lịch Sử Mua Hàng
             </router-link>
           </div>
         </div>
 
-        <!-- Thông tin -->
         <div class="flex-grow-1">
           <h3 class="fw-bold mb-2">{{ user.fullname }}</h3>
           <p class="text-muted mb-1">
-            <i class="fa fa-envelope me-2" style="color: greenyellow"></i
-            >{{ user.email }}
+            <i class="fa fa-envelope me-2" style="color: greenyellow"></i>
+            {{ user.email }}
           </p>
           <p class="text-muted mb-1">
-            <i class="fa fa-phone me-2" style="color: aquamarine"></i
-            >{{ user.phone }}
+            <i class="fa fa-phone me-2" style="color: aquamarine"></i>
+            {{ user.phone }}
           </p>
           <p class="text-muted mb-1">
-            <i class="fa fa-map-marker me-2" style="color: brown"></i
-            >{{ user.address }}
+            <i class="fa fa-map-marker me-2" style="color: brown"></i>
+            {{ user.address }}
           </p>
           <p class="text-muted mb-1">
-            <i class="fa-solid fa-person" style="color: pink"></i
-            >{{
+            <i class="fa-solid fa-person" style="color: pink"></i>
+            {{
               user.day_of_birth
                 ? new Date().getFullYear() -
                   new Date(user.day_of_birth).getFullYear() +
@@ -108,15 +120,14 @@ const saveChanges = async () => {
                 : ""
             }}
           </p>
-          <span class="badge bg-success mt-2 text-uppercase">{{
-            user.role
-          }}</span>
+          <span class="badge bg-success mt-2 text-uppercase">
+            {{ user.role }}
+          </span>
         </div>
       </div>
 
       <hr class="my-4" />
 
-      <!-- Form chỉnh sửa -->
       <div>
         <h5 class="fw-bold mb-3">Sửa Thông Tin</h5>
         <div class="row g-3">
@@ -163,12 +174,12 @@ const saveChanges = async () => {
               v-model="user.day_of_birth"
               type="date"
               class="form-control"
-              placeholder="Nhập tuổi"
             />
           </div>
           <div class="col-md-6">
             <label class="form-label">Giới Tính</label>
             <select v-model="user.sex" class="form-control">
+              <option disabled value="">-- Chọn giới tính --</option>
               <option value="Nam">Nam</option>
               <option value="Nu">Nữ</option>
               <option value="BeDe">Bê Đê</option>
@@ -213,7 +224,8 @@ img:hover {
   transform: scale(1.03);
 }
 
-input:focus {
+input:focus,
+select:focus {
   border-color: #000 !important;
   box-shadow: none;
 }

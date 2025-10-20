@@ -1,21 +1,46 @@
 <script setup>
 import { computed } from 'vue';
 import { useStore } from 'vuex';
+import Swal from 'sweetalert2';
 
 const store = useStore();
 
 const wishlist = computed(() => store.getters['wishlist/wishlist']);
 
 const removeFromWishlist = (productId) => {
-  if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-    store.dispatch('wishlist/removeFromWishlist', productId);
-  }
+  Swal.fire({
+    title: 'Xác nhận xoá',
+    text: 'Bạn có chắc muốn xoá sản phẩm này khỏi danh sách yêu thích?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#000',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Xoá',
+    cancelButtonText: 'Huỷ'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      store.dispatch('wishlist/removeFromWishlist', productId);
+      Swal.fire({
+        icon: 'success',
+        title: 'Đã xoá!',
+        text: 'Sản phẩm đã được xoá khỏi danh sách yêu thích.',
+        showConfirmButton: false,
+        timer: 1500
+      });
+    }
+  });
 };
 
 const addToCart = (product) => {
   store.dispatch('cart/addProductToCart', product);
-  alert('Đã thêm vào giỏ hàng!');
-}
+  Swal.fire({
+    icon: 'success',
+    title: 'Đã thêm vào giỏ hàng!',
+    text: `${product.name} đã được thêm vào giỏ hàng.`,
+    showConfirmButton: false,
+    timer: 1500
+  });
+};
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);

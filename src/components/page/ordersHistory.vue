@@ -69,10 +69,21 @@ const cancelOrder = async (orderId) => {
 };
 
 // mua lại
-const buyAgain = (order) => {
-  if (confirm('Bạn có muốn thêm tất cả sản phẩm của đơn hàng này vào giỏ hàng không?')) {
-    order.products.forEach(product => {
-      store.dispatch('cart/addToCart', {
+const buyAgain = async (order) => {
+  const result = await Swal.fire({
+    title: 'Mua lại đơn hàng này?',
+    text: 'Tất cả sản phẩm trong đơn sẽ được thêm lại vào giỏ hàng của bạn.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#000',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Mua lại',
+    cancelButtonText: 'Huỷ'
+  });
+
+  if (result.isConfirmed) {
+    for (const product of order.products) {
+      await store.dispatch('cart/addToCart', {
         id: product.id,
         name: product.name,
         category: product.category || '',
@@ -81,12 +92,12 @@ const buyAgain = (order) => {
         image: Array.isArray(product.image) ? product.image : [product.image],
         quantity: product.quantity || 1
       });
-    });
+    }
 
     Swal.fire({
       icon: 'success',
-      title: 'Thành công!',
-      text: 'Tất cả sản phẩm đã được thêm lại vào giỏ hàng.',
+      title: 'Đã thêm lại vào giỏ hàng!',
+      text: 'Bạn có thể kiểm tra trong giỏ hàng 💖',
       timer: 2000,
       showConfirmButton: false
     });
@@ -94,6 +105,7 @@ const buyAgain = (order) => {
     router.push('/cart');
   }
 };
+
 
 
 onMounted(fetchOrders);

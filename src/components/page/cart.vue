@@ -1,14 +1,31 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import Swal from "sweetalert2";
 
 const store = useStore();
+const router = useRouter();
 
 onMounted(() => {
   store.dispatch("cart/fetchCart");
 });
+
+const handlePaymentSuccess = () => {
+  Swal.fire({
+    icon: "success",
+    title: "Thanh toán thành công!",
+    text: "Cảm ơn bạn đã mua hàng ❤️",
+    showConfirmButton: false,
+    timer: 2000,
+  });
+
+  store.dispatch("cart/deleteAllCart");
+
+  setTimeout(() => {
+    router.push("/");
+  }, 2000);
+};
 
 const cart = computed(() => store.getters["cart/cartItems"]);
 const subtotal = computed(() => store.getters["cart/cartTotal"]);
@@ -100,53 +117,29 @@ const deleteAllCart = () => {
                 <tr v-for="item in cart" :key="item.id">
                   <td>
                     <div class="d-flex align-items-center text-start">
-                      <img
-                        :src="item.image[0]"
-                        class="rounded me-3 border"
-                        width="70"
-                      />
+                      <img :src="item.image[0]" class="rounded me-3 border" width="70" />
                       <div>
                         <h6 class="mb-0">{{ item.name }}</h6>
-                        <small class="text-muted"
-                          >Danh mục: {{ item.category }}</small
-                        >
+                        <small class="text-muted">Danh mục: {{ item.category }}</small>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span class="text-danger fw-semibold"
-                      >{{
-                        Number(item.discount).toLocaleString("vi-VN")
-                      }}
-                      ₫</span
-                    ><br />
-                    <small class="text-muted text-decoration-line-through"
-                      >{{ Number(item.price).toLocaleString("vi-VN") }} ₫</small
-                    >
+                    <span class="text-danger fw-semibold">{{
+                      Number(item.discount).toLocaleString("vi-VN")
+                    }}
+                      ₫</span><br />
+                    <small class="text-muted text-decoration-line-through">{{ Number(item.price).toLocaleString("vi-VN")
+                      }} ₫</small>
                   </td>
                   <td>
-                    <div
-                      class="input-group input-group-sm mx-auto"
-                      style="width: 120px"
-                    >
-                      <button
-                        @click="decrease(item)"
-                        class="btn btn-outline-dark"
-                      >
+                    <div class="input-group input-group-sm mx-auto" style="width: 120px">
+                      <button @click="decrease(item)" class="btn btn-outline-dark">
                         -
                       </button>
-                      <input
-                        :value="item.quantity"
-                        type="number"
-                        class="form-control text-center"
-                        min="1"
-                        max="100"
-                        readonly
-                      />
-                      <button
-                        @click="increase(item)"
-                        class="btn btn-outline-dark"
-                      >
+                      <input :value="item.quantity" type="number" class="form-control text-center" min="1" max="100"
+                        readonly />
+                      <button @click="increase(item)" class="btn btn-outline-dark">
                         +
                       </button>
                     </div>
@@ -158,10 +151,7 @@ const deleteAllCart = () => {
                     ₫
                   </td>
                   <td>
-                    <button
-                      @click="deleteCartItem(item.id)"
-                      class="btn btn-sm btn-danger"
-                    >
+                    <button @click="deleteCartItem(item.id)" class="btn btn-sm btn-danger">
                       <i class="fa fa-trash"></i>
                     </button>
                   </td>
@@ -203,12 +193,10 @@ const deleteAllCart = () => {
                 {{ total.toLocaleString("vi-VN") }} ₫
               </span>
             </div>
-            <RouterLink
-              to="/checkout"
-              class="btn btn-outline-success w-100 mt-4 fw-semibold"
-            >
-              Tiến hành thanh toán
-            </RouterLink>
+            <button @click="handlePaymentSuccess" class="btn btn-success w-100 mt-4 fw-semibold">
+              Thanh toán ngay
+            </button>
+
           </div>
         </div>
       </div>

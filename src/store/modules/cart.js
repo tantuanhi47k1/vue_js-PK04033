@@ -78,6 +78,12 @@ const actions = {
     }
   },
 
+  // mua lại sp
+  async addToCart({ dispatch }, product) {
+    await dispatch("addProductToCart", product);
+  },
+
+
   // Xóa 1 sản phẩm
   async deleteCart({ commit }, id) {
     try {

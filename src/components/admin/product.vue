@@ -7,7 +7,7 @@ const selectedName = ref("")
 const selectedId = ref(null)
 const category = ref([])
 const products = ref([])
-const form = ref({ name: "", price: "", discount: "", quantity: "", status: "", description: "", categoryId: "", image: [] })
+const form = ref({ name: "", price: "", discount: "", quantity: "", status: "", description: "", categoryId: "", image: [], lowStockThreshold: 5 })
 
 const readCategory = async () => {
     try {
@@ -113,7 +113,8 @@ const askEdit = (item) => {
         status: item.status,
         description: item.description,
         categoryId: item.categoryId,
-        image: item.image || []
+        image: item.image || [],
+        lowStockThreshold: item.lowStockThreshold || 5
     }
 }
 
@@ -174,7 +175,8 @@ const resertForm = () => {
         status: "",
         description: "",
         categoryId: "",
-        image: []
+        image: [],
+        lowStockThreshold: 5
     }
     selectedId.value = null
     selectedName.value = ""
@@ -191,14 +193,12 @@ onMounted(() => {
     <div class="container mt-5">
         <h2 class="text-center fw-bold mb-4">Quản Lý Sản Phẩm</h2>
 
-        <!-- Nút thêm sản phẩm -->
         <div class="text-end mb-3">
             <button class="btn btn-success px-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
                 <i class="fa fa-plus me-1"></i> Thêm sản phẩm
             </button>
         </div>
 
-        <!-- Bảng sản phẩm -->
         <div class="table-responsive shadow-sm rounded-3">
             <table class="table table-bordered table-hover align-middle mb-0">
                 <thead class="table-dark text-center">
@@ -227,8 +227,17 @@ onMounted(() => {
                         <td>{{ Number(i.discount).toLocaleString('vi-VN') }} đ (-{{ Math.round(100 - (i.discount /
                             i.price) * 100) }}%)</td>
                         <td>{{ i.quantity }}</td>
-                        <td><span class="badge" :class="i.status === 'Còn hàng' ? 'bg-success' : 'bg-danger'">{{
-                            i.status }}</span></td>
+                        <td>
+                            <span v-if="i.quantity === 0" class="badge bg-danger">
+                                Hết hàng
+                            </span>
+                            <span v-else-if="i.quantity <= i.lowStockThreshold" class="badge bg-warning text-dark">
+                                Sắp hết hàng
+                            </span>
+                            <span v-else class="badge bg-success">
+                                Còn hàng
+                            </span>
+                        </td>
                         <td>
                             <router-link :to="`/admin/readProduct/${i.id}`" class="btn btn-outline-info btn-sm me-2">
                                 <i class="fa fa-eye"></i>
@@ -315,7 +324,8 @@ onMounted(() => {
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Hủy</button>
-                        <button @click="addProduct" data-bs-dismiss="modal" type="button" class="btn btn-success">Lưu sản
+                        <button @click="addProduct" data-bs-dismiss="modal" type="button" class="btn btn-success">Lưu
+                            sản
                             phẩm</button>
                     </div>
                 </div>
@@ -348,7 +358,13 @@ onMounted(() => {
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số lượng</label>
-                                    <input v-model="form.quantity" type="number" class="form-control" value="10" />
+                                    <input v-model="form.quantity" type="number" class="form-control"
+                                        placeholder="Nhập số lượng" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ngưỡng báo sắp hết hàng</label>
+                                    <input v-model="form.lowStockThreshold" type="number" class="form-control"
+                                        placeholder="VD: 5" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Trạng thái</label>

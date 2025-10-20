@@ -74,15 +74,23 @@ onMounted(() => {
 })
 
 const addToCart = (product) => {
-  store.dispatch('cart/addProductToCart', product)
-  Swal.fire({
-    icon: 'success',
-    title: 'Đã thêm vào giỏ hàng!',
-    showConfirmButton: "OK",
-    confirmButtonColor: '#000',
-    text: 'Sản phẩm đã được thêm vào giỏ hàng.',
-    timer: 2000
-  })
+  if (product.quantity > 0) {
+    store.dispatch('cart/addProductToCart', product)
+    Swal.fire({
+      icon: 'success',
+      title: 'Đã thêm vào giỏ hàng!',
+      showConfirmButton: "OK",
+      confirmButtonColor: '#000',
+      text: 'Sản phẩm đã được thêm vào giỏ hàng.',
+      timer: 2000
+    })
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Sản phẩm đã hết hàng!',
+      confirmButtonColor: '#000',
+    });
+  }
 }
 
 const isInWishlist = (productId) => {
@@ -112,18 +120,14 @@ const toggleWishlist = (product) => {
           <h5 class="fw-bold mt-4 mb-3">Danh mục sản phẩm</h5>
           <ul class="list-unstyled sidebar-menu">
             <li>
-              <a href="#" 
-                 @click.prevent="selectCategory(null)" 
-                 class="text-decoration-none text-dark d-block py-2"
-                 :class="{ 'active-category': selectedCategoryId === null }">
+              <a href="#" @click.prevent="selectCategory(null)" class="text-decoration-none text-dark d-block py-2"
+                :class="{ 'active-category': selectedCategoryId === null }">
                 Tất cả sản phẩm
               </a>
             </li>
             <li v-for="cat in categories" :key="cat.id">
-              <a href="#" 
-                 @click.prevent="selectCategory(cat.id)" 
-                 class="text-decoration-none text-dark d-block py-2"
-                 :class="{ 'active-category': selectedCategoryId === cat.id }">
+              <a href="#" @click.prevent="selectCategory(cat.id)" class="text-decoration-none text-dark d-block py-2"
+                :class="{ 'active-category': selectedCategoryId === cat.id }">
                 {{ cat.nameCategory }}
               </a>
             </li>
@@ -149,12 +153,14 @@ const toggleWishlist = (product) => {
               <div class="position-relative product-image-container">
                 <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
                   <img :src="item.image[0]" class="card-img-top" alt="product" />
-                  <span v-if="item.discount < item.price" class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1" style="font-size: 0.8rem">
+                  <span v-if="item.discount < item.price"
+                    class="badge bg-danger position-absolute top-0 start-0 m-2 px-2 py-1" style="font-size: 0.8rem">
                     Giảm giá!
                   </span>
                 </router-link>
                 <div class="product-icons">
-                  <a href="#" @click.prevent="addToCart(item)" class="text-success">
+                  <a href="#" @click.prevent="addToCart(item)" class="text-success"
+                    :class="{ 'disabled-icon': item.quantity === 0 }">
                     <i class="fa fa-cart-plus"></i>
                   </a>
                   <a href="#" @click.prevent="toggleWishlist(item)" :class="{ 'text-danger': isInWishlist(item.id) }">
@@ -164,25 +170,25 @@ const toggleWishlist = (product) => {
               </div>
 
               <div class="card-body text-center">
-                  <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
-                    <p class="text-secondary small mb-1">
-                      {{ categories.find((c) => c.id === item.categoryId)?.nameCategory || 'Không có' }}
+                <router-link :to="`/productDetail/${item.id}`" class="text-decoration-none text-dark">
+                  <p class="text-secondary small mb-1">
+                    {{categories.find((c) => c.id === item.categoryId)?.nameCategory || 'Không có'}}
+                  </p>
+                  <h6 class="fw-semibold">{{ item.name }}</h6>
+                  <template v-if="item.discount < item.price">
+                    <p class="text-muted text-decoration-line-through small mb-1">
+                      {{ Number(item.price).toLocaleString('vi-VN') }} ₫
                     </p>
-                    <h6 class="fw-semibold">{{ item.name }}</h6>
-                    <template v-if="item.discount < item.price">
-                      <p class="text-muted text-decoration-line-through small mb-1">
-                        {{ Number(item.price).toLocaleString('vi-VN') }} ₫
-                      </p>
-                      <p class="fw-bold mb-1 text-danger">
-                        {{ Number(item.discount).toLocaleString('vi-VN') }} ₫
-                      </p>
-                    </template>
-                    <template v-else>
-                      <p class="fw-bold text-danger mb-0">
-                        {{ Number(item.price).toLocaleString('vi-VN') }} ₫
-                      </p>
-                    </template>
-                  </router-link>
+                    <p class="fw-bold mb-1 text-danger">
+                      {{ Number(item.discount).toLocaleString('vi-VN') }} ₫
+                    </p>
+                  </template>
+                  <template v-else>
+                    <p class="fw-bold text-danger mb-0">
+                      {{ Number(item.price).toLocaleString('vi-VN') }} ₫
+                    </p>
+                  </template>
+                </router-link>
               </div>
             </div>
           </div>
@@ -257,4 +263,12 @@ const toggleWishlist = (product) => {
 .card:hover img {
   transform: scale(1.05);
 }
+
+.disabled-icon {
+  background-color: #f0f0f0 !important;
+  color: #cccccc !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 </style>

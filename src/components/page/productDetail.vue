@@ -52,31 +52,34 @@ const readRelatedProducts = async () => {
 };
 
 const addToCart = () => {
-  if (product.value) {
+  if (product.value && product.value.quantity > 0) {
     store.dispatch("cart/addProductToCart", product.value);
     Swal.fire({
-    icon: 'success',
-    title: 'Đã thêm vào giỏ hàng!',
-    showConfirmButton: "OK",
-    confirmButtonColor: '#000',
-    text: 'Sản phâm đã được thêm vào giỏ hàng.',
-    timer: 2000
-  })
+      icon: 'success',
+      title: 'Đã thêm vào giỏ hàng!',
+      showConfirmButton: "OK",
+      confirmButtonColor: '#000',
+      text: 'Sản phẩm đã được thêm vào giỏ hàng.',
+      timer: 2000
+    });
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Sản phẩm đã hết hàng!',
+      text: 'Rất tiếc, bạn không thể thêm sản phẩm này vào giỏ.',
+      confirmButtonColor: '#000',
+    });
   }
 };
 
 const isInWishlist = (productId) => {
-  // Dùng getter từ store/modules/wishlist.js
   return store.getters['wishlist/isInWishlist'](productId);
 }
 
-// Hàm thêm/xóa sản phẩm khỏi wishlist
 const toggleWishlist = (product) => {
   if (isInWishlist(product.id)) {
-    // Nếu đã có, gọi action xóa
     store.dispatch('wishlist/removeFromWishlist', product.id);
   } else {
-    // Nếu chưa có, gọi action thêm
     store.dispatch('wishlist/addToWishlist', product);
   }
 }
@@ -101,19 +104,10 @@ watch(
       <h2 style="text-align: center;">Chi Tiết Sản Phẩm</h2>
       <div class="col-md-6">
         <div class="border rounded p-3 bg-white shadow-sm">
-          <img
-            :src="product.image[0]"
-            class="img-fluid w-100 rounded mb-3 main-img"
-            alt="product"
-          />
+          <img :src="product.image[0]" class="img-fluid w-100 rounded mb-3 main-img" alt="product" />
           <div class="d-flex gap-2">
-            <img
-              v-for="(img, idx) in product.image"
-              :key="idx"
-              :src="img"
-              class="img-thumbnail small-img"
-              alt="gallery"
-            />
+            <img v-for="(img, idx) in product.image" :key="idx" :src="img" class="img-thumbnail small-img"
+              alt="gallery" />
           </div>
         </div>
       </div>
@@ -149,15 +143,16 @@ watch(
           </p>
 
           <div class="mt-4 d-flex gap-3">
-            <div @click="addToCart" class="btn btn-warning px-4 py-2">
-              <i class="fa fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+            <div @click="addToCart" class="btn btn-warning px-4 py-2"
+              :class="{ 'disabled-btn': product.quantity === 0 }">
+              <i class="fa fa-shopping-cart me-2"></i>
+              {{ product.quantity > 0 ? 'Thêm vào giỏ hàng' : 'Đã hết hàng' }}
             </div>
-            <button @click="toggleWishlist(product)" 
-                      class="btn btn-outline-danger px-4 py-2"
-                      :class="{ 'active': isInWishlist(product.id) }">
-                <i class="fa me-2" :class="isInWishlist(product.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
-                {{ isInWishlist(product.id) ? 'Đã Thích' : 'Yêu Thích' }}
-              </button>
+            <button @click="toggleWishlist(product)" class="btn btn-outline-danger px-4 py-2"
+              :class="{ 'active': isInWishlist(product.id) }">
+              <i class="fa me-2" :class="isInWishlist(product.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+              {{ isInWishlist(product.id) ? 'Đã Thích' : 'Yêu Thích' }}
+            </button>
           </div>
 
           <hr class="my-4" />
@@ -206,20 +201,10 @@ watch(
       </div>
       <div class="mt-5">
         <h3 class="fw-bold mb-4">Sản phẩm liên quan</h3>
-        <div
-          v-if="relatedProducts.length"
-          class="row row-cols-2 row-cols-md-4 g-4"
-        >
+        <div v-if="relatedProducts.length" class="row row-cols-2 row-cols-md-4 g-4">
           <div v-for="item in relatedProducts" :key="item.id" class="col">
-            <div
-              class="card h-100 border-0 shadow-sm related-item"
-              @click="router.push(`/productDetail/${item.id}`)"
-            >
-              <img
-                :src="item.image[0]"
-                class="card-img-top"
-                alt="related product"
-              />
+            <div class="card h-100 border-0 shadow-sm related-item" @click="router.push(`/productDetail/${item.id}`)">
+              <img :src="item.image[0]" class="card-img-top" alt="related product" />
               <div class="card-body text-center">
                 <h6 class="card-title text-truncate">{{ item.name }}</h6>
                 <p class="text-danger fw-bold mb-0">
@@ -281,6 +266,13 @@ button.btn-outline-dark:hover {
 .btn-outline-danger.active {
   background-color: #dc3545;
   color: white;
+}
+
+.disabled-btn {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {

@@ -193,9 +193,9 @@ const deleteAllCart = () => {
                 {{ total.toLocaleString("vi-VN") }} ₫
               </span>
             </div>
-            <button @click="handlePaymentSuccess" class="btn btn-success w-100 mt-4 fw-semibold">
-              Thanh toán ngay
-            </button>
+            <RouterLink to="/checkout" class="btn btn-success w-100 mt-4 fw-semibold">
+  Tiến hành Thanh toán
+</RouterLink>
 
           </div>
         </div>

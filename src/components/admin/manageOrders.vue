@@ -17,12 +17,27 @@ const fetchOrders = async () => {
 
 const updateStatus = async (order, newStatus) => {
   try {
+    if (newStatus === 'Đã hủy' && order.status !== 'Đã hủy') {
+      for (const item of order.products) {
+        try {
+          const response = await axios.get(`http://localhost:3000/products/${item.id}`);
+          const product = response.data;
+          const newQuantity = product.quantity + item.quantity;
+          await axios.patch(`http://localhost:3000/products/${item.id}`, {
+            quantity: newQuantity,
+          });
+        } catch (error) {
+          console.error(`Lỗi khi hoàn lại số lượng cho sản phẩm ${item.id}:`, error);
+        }
+      }
+    }
+
     await axios.patch(`http://localhost:3000/orders/${order.id}`, { status: newStatus });
     order.status = newStatus;
-    Swal.fire('Thành công', 'Cập nhật trạng thái thành công!', 'success');
+    Swal.fire("Thành công", "Cập nhật trạng thái thành công!", "success");
   } catch (err) {
     console.error("Lỗi khi cập nhật trạng thái:", err);
-    Swal.fire('Thất bại', 'Có lỗi xảy ra.', 'error');
+    Swal.fire("Lỗi", "Cập nhật trạng thái thất bại!", "error");
   }
 };
 

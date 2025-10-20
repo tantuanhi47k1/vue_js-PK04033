@@ -150,7 +150,18 @@ const placeOrder = async () => {
 
   try {
     await axios.post("http://localhost:3000/orders", orderDetails);
-
+    for (const item of cart.value) {
+      try {
+        const response = await axios.get(`http://localhost:3000/products/${item.productId}`);
+        const product = response.data;
+        const newQuantity = product.quantity - item.quantity;
+        await axios.patch(`http://localhost:3000/products/${item.productId}`, {
+          quantity: newQuantity,
+        });
+      } catch (error) {
+        console.error(`Lỗi khi cập nhật số lượng cho sản phẩm ${item.productId}:`, error);
+      }
+    }
     await store.dispatch("cart/deleteAllCart");
 
     Swal.fire({
@@ -236,7 +247,7 @@ const placeOrder = async () => {
           <div v-for="item in cart" :key="item.id"
             class="cart-item d-flex align-items-center justify-content-between mb-3">
             <div class="d-flex align-items-center gap-3">
-              <img :src="item.image" alt="Ảnh sản phẩm" class="product-thumb" />
+              <img :src="item.image[0]" alt="Ảnh sản phẩm" class="product-thumb" />
               <div>
                 <p class="mb-1 fw-medium">{{ item.name }}</p>
                 <small class="text-muted">Số lượng: {{ item.quantity }}</small>

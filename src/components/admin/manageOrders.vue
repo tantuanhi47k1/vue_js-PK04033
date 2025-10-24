@@ -6,9 +6,14 @@ import Swal from 'sweetalert2';
 const orders = ref([]);
 const statuses = ['Chờ xử lý', 'Đang vận chuyển', 'Đã giao', 'Đã hủy'];
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const fetchOrders = async () => {
   try {
-    const { data } = await axios.get('http://localhost:3000/orders');
+    const { data } = await axios.get(`${API_URL}/orders`, ngrokHeaderConfig);
     orders.value = data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
   } catch (err) {
     console.error("Lỗi khi tải đơn hàng:", err);
@@ -20,10 +25,10 @@ const updateStatus = async (order, newStatus) => {
     if (newStatus === 'Đã hủy' && order.status !== 'Đã hủy') {
       for (const item of order.products) {
         try {
-          const response = await axios.get(`http://localhost:3000/products/${item.id}`);
+          const response = await axios.get(`${API_URL}/products/${item.id}`, ngrokHeaderConfig);
           const product = response.data;
           const newQuantity = product.quantity + item.quantity;
-          await axios.patch(`http://localhost:3000/products/${item.id}`, {
+          await axios.patch(`${API_URL}/products/${item.id}`, ngrokHeaderConfig, {
             quantity: newQuantity,
           });
         } catch (error) {
@@ -32,7 +37,7 @@ const updateStatus = async (order, newStatus) => {
       }
     }
 
-    await axios.patch(`http://localhost:3000/orders/${order.id}`, { status: newStatus });
+    await axios.patch(`${API_URL}/orders/${order.id}`, ngrokHeaderConfig, { status: newStatus });
     order.status = newStatus;
     Swal.fire("Thành công", "Cập nhật trạng thái thành công!", "success");
   } catch (err) {

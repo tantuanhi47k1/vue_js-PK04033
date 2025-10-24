@@ -10,6 +10,11 @@ const coupons = ref([]);
 const bestSellingProducts = ref([]);
 const store = useStore();
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const scrollContainer = ref(null);
 const scrollLeft = () =>
   scrollContainer.value.scrollBy({ left: -350, behavior: "smooth" });
@@ -24,7 +29,7 @@ const scrollProductRight = () =>
 
 const readCategory = async () => {
   try {
-    const res = await axios.get("http://localhost:3000/categories");
+    const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig);
     category.value = res.data;
   } catch (err) {
     console.error("Error: ", err);
@@ -33,7 +38,7 @@ const readCategory = async () => {
 
 const readProduct = async () => {
   try {
-    const res = await axios.get("http://localhost:3000/products");
+    const res = await axios.get(`${API_URL}/products`, ngrokHeaderConfig);
     products.value = res.data;
   } catch (err) {
     console.error("Error: ", err);
@@ -42,7 +47,7 @@ const readProduct = async () => {
 
 const readCoupons = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/coupons');
+    const res = await axios.get(`${API_URL}/coupons`, ngrokHeaderConfig);
     coupons.value = res.data;
   } catch (err) {
     console.error('Lỗi khi tải mã giảm giá:', err);
@@ -52,8 +57,8 @@ const readCoupons = async () => {
 const readBestSellingProducts = async () => {
   try {
     const [ordersRes, productsRes] = await Promise.all([
-      axios.get("http://localhost:3000/orders"),
-      axios.get("http://localhost:3000/products"),
+      axios.get(`${API_URL}/orders`, ngrokHeaderConfig),
+      axios.get(`${API_URL}/products`, ngrokHeaderConfig),
     ]);
 
     const orders = ordersRes.data;

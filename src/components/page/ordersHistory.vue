@@ -10,6 +10,11 @@ const isLoading = ref(true);
 const store = useStore();
 const router = useRouter();
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const getStatusClass = (status) => {
   switch (status) {
     case 'Chờ xử lý': return 'text-primary';
@@ -24,7 +29,7 @@ const fetchOrders = async () => {
   const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
   if (loggedInUser) {
     try {
-      const { data } = await axios.get(`http://localhost:3000/orders?userId=${loggedInUser.id}`);
+      const { data } = await axios.get(`${API_URL}/orders?userId=${loggedInUser.id}`, ngrokHeaderConfig);
       orders.value = data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
     } catch (err)      {
       console.error("Lỗi khi tải lịch sử đơn hàng:", err);
@@ -48,7 +53,7 @@ const cancelOrder = async (orderId) => {
 
   if (result.isConfirmed) {
     try {
-      await axios.patch(`http://localhost:3000/orders/${orderId}`, { status: 'Cancelled' });
+      await axios.patch(`${API_URL}/orders/${orderId}`, { status: 'Cancelled' }, ngrokHeaderConfig);
 
       fetchOrders();
 

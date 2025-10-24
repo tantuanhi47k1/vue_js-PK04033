@@ -6,6 +6,11 @@ import Swal from 'sweetalert2'
 
 const store = useStore()
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const categories = ref([])
 const products = ref([])
 const searchQuery = ref('')
@@ -14,7 +19,7 @@ const selectedCategoryId = ref(null)
 
 const readCategories = async () => {
   try {
-    const { data } = await axios.get('http://localhost:3000/categories')
+    const { data } = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig)
     categories.value = data
   } catch (err) {
     console.error('Error reading categories:', err)
@@ -23,7 +28,7 @@ const readCategories = async () => {
 
 const readProducts = async () => {
   try {
-    const { data } = await axios.get('http://localhost:3000/products')
+    const { data } = await axios.get(`${API_URL}/products`, ngrokHeaderConfig)
     products.value = data
   } catch (err) {
     console.error('Error reading products:', err)

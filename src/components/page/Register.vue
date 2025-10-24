@@ -12,6 +12,11 @@ const form = ref({
   role: "user",
 });
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const handleSubmit = async () => {
   let users = JSON.parse(localStorage.getItem("users")) || [];
 
@@ -26,7 +31,7 @@ const handleSubmit = async () => {
   }
 
   try {
-    const res = await axios.post("http://localhost:3000/user", form.value);
+    const res = await axios.post(`${API_URL}/user`, form.value, ngrokHeaderConfig);
     if (res.status === 201) {
       users.push(form.value);
       localStorage.setItem("users", JSON.stringify(users));

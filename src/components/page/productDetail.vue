@@ -13,10 +13,15 @@ const categories = ref([]);
 const relatedProducts = ref([]);
 const router = useRouter();
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const readProductDetail = async () => {
   try {
     const res = await axios.get(
-      `http://localhost:3000/products/${route.params.id}`
+      `${API_URL}/products/${route.params.id}`, ngrokHeaderConfig
     );
     product.value = res.data;
 
@@ -29,7 +34,7 @@ const readProductDetail = async () => {
 
 const readCategories = async () => {
   try {
-    const res = await axios.get(`http://localhost:3000/categories`);
+    const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig);
     categories.value = res.data;
   } catch (err) {
     console.error("Err: ", err);
@@ -39,7 +44,7 @@ const readCategories = async () => {
 const readRelatedProducts = async () => {
   if (!product.value) return;
   try {
-    const res = await axios.get(`http://localhost:3000/products`);
+    const res = await axios.get(`${API_URL}/products`, ngrokHeaderConfig);
     relatedProducts.value = res.data
       .filter(
         (p) =>

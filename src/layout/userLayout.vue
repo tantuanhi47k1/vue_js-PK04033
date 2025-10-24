@@ -8,6 +8,11 @@ const router = useRouter();
 const user = ref(null);
 const store = useStore();
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const cartItemCount = computed(() => store.getters["cart/cartItemCount"]);
 const wishlistCount = computed(() => store.getters["wishlist/wishlist"].length);
 
@@ -16,7 +21,7 @@ onMounted(async () => {
   if (storedUser) {
     try {
       const res = await axios.get(
-        `http://localhost:3000/user/${storedUser.id}`
+        `${API_URL}/user/${storedUser.id}`, ngrokHeaderConfig
       );
       user.value = res.data;
     } catch (err) {

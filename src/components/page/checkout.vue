@@ -23,11 +23,15 @@ const shippingFee = ref(0);
 const cart = computed(() => store.getters["cart/cartItems"]);
 const subtotal = computed(() => store.getters["cart/cartTotal"]);
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+  headers: { "ngrok-skip-browser-warning": "true" },
+};
+
 const total = computed(() => {
   const finalTotal = subtotal.value - discount.value + shippingFee.value;
   return finalTotal > 0 ? finalTotal : 0;
 });
-
 
 onMounted(() => {
   store.dispatch("cart/fetchCart");
@@ -52,7 +56,6 @@ watch(subtotal, (newValue) => {
     couponCode.value = "";
   }
 });
-
 
 watch(cart, () => {
   discount.value = 0;
@@ -79,7 +82,8 @@ const applyCoupon = async () => {
 
   try {
     const { data: coupons } = await axios.get(
-      `http://localhost:3000/coupons?code=${couponCode.value}`
+      `${API_URL}/coupons?code=${couponCode.value}`,
+      ngrokHeaderConfig
     );
     const coupon = coupons[0];
 
@@ -149,19 +153,23 @@ const placeOrder = async () => {
   };
 
   try {
-    await axios.post("http://localhost:3000/orders", orderDetails);
+    await axios.post(`${API_URL}/orders`, orderDetails, ngrokHeaderConfig);
+
     for (const item of cart.value) {
       try {
-        const response = await axios.get(`http://localhost:3000/products/${item.productId}`);
+        const response = await axios.get(`${API_URL}/products/${item.productId}`, ngrokHeaderConfig);
         const product = response.data;
         const newQuantity = product.quantity - item.quantity;
-        await axios.patch(`http://localhost:3000/products/${item.productId}`, {
+
+        await axios.patch(`${API_URL}/products/${item.productId}`, {
           quantity: newQuantity,
-        });
+        }, ngrokHeaderConfig);
+
       } catch (error) {
         console.error(`Lỗi khi cập nhật số lượng cho sản phẩm ${item.productId}:`, error);
       }
     }
+    
     await store.dispatch("cart/deleteAllCart");
 
     Swal.fire({
@@ -195,11 +203,19 @@ const placeOrder = async () => {
         <div class="card p-4 shadow-sm border-0">
           <div class="mb-3">
             <label class="form-label">Họ và tên</label>
-            <input type="text" v-model="userInfo.fullname" class="form-control" />
+            <input
+              type="text"
+              v-model="userInfo.fullname"
+              class="form-control"
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Địa chỉ</label>
-            <input type="text" v-model="userInfo.address" class="form-control" />
+            <input
+              type="text"
+              v-model="userInfo.address"
+              class="form-control"
+            />
           </div>
           <div class="mb-3">
             <label class="form-label">Số điện thoại</label>
@@ -207,33 +223,69 @@ const placeOrder = async () => {
           </div>
           <div class="mb-3">
             <label class="form-label">Ghi chú <em>(tùy chọn)</em></label>
-            <textarea v-model="userInfo.note" class="form-control" rows="3"></textarea>
+            <textarea
+              v-model="userInfo.note"
+              class="form-control"
+              rows="3"
+            ></textarea>
           </div>
         </div>
 
         <h4 class="mt-4 mb-3 fw-semibold">Phương thức thanh toán 💳</h4>
         <div class="card p-4 shadow-sm border-0">
           <div class="form-check d-flex align-items-center gap-2 mb-2">
-            <input class="form-check-input mt-0" type="radio" v-model="paymentMethod" value="cod" id="cod" />
-            <label class="form-check-label d-flex align-items-center gap-2 fw-medium" for="cod">
+            <input
+              class="form-check-input mt-0"
+              type="radio"
+              v-model="paymentMethod"
+              value="cod"
+              id="cod"
+            />
+            <label
+              class="form-check-label d-flex align-items-center gap-2 fw-medium"
+              for="cod"
+            >
               <i class="fa-solid fa-hand-holding-dollar text-success fs-5"></i>
               <span>Thanh toán khi nhận hàng (COD)</span>
             </label>
           </div>
 
           <div class="form-check d-flex align-items-center gap-2 mb-2">
-            <input class="form-check-input mt-0" type="radio" v-model="paymentMethod" value="momo" id="momo" />
-            <label class="form-check-label d-flex align-items-center gap-2 fw-medium" for="momo">
-              <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" width="22" height="22"
-                style="border-radius: 4px" />
+            <input
+              class="form-check-input mt-0"
+              type="radio"
+              v-model="paymentMethod"
+              value="momo"
+              id="momo"
+            />
+            <label
+              class="form-check-label d-flex align-items-center gap-2 fw-medium"
+              for="momo"
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                alt="MoMo"
+                width="22"
+                height="22"
+                style="border-radius: 4px"
+              />
               <span>Thanh toán qua MoMo</span>
             </label>
           </div>
 
           <div class="form-check d-flex align-items-center gap-2">
-            <input class="form-check-input mt-0" type="radio" v-model="paymentMethod" value="vnpay" id="vnpay"
-              disabled />
-            <label class="form-check-label d-flex align-items-center gap-2 text-muted" for="vnpay">
+            <input
+              class="form-check-input mt-0"
+              type="radio"
+              v-model="paymentMethod"
+              value="vnpay"
+              id="vnpay"
+              disabled
+            />
+            <label
+              class="form-check-label d-flex align-items-center gap-2 text-muted"
+              for="vnpay"
+            >
               <i class="fa-solid fa-credit-card text-primary fs-5"></i>
               <span>VNPAY (Đang phát triển)</span>
             </label>
@@ -244,10 +296,17 @@ const placeOrder = async () => {
       <div class="col-md-5">
         <h4 class="mb-3 fw-semibold">Tóm tắt đơn hàng</h4>
         <div class="card p-4 shadow-sm border-0">
-          <div v-for="item in cart" :key="item.id"
-            class="cart-item d-flex align-items-center justify-content-between mb-3">
+          <div
+            v-for="item in cart"
+            :key="item.id"
+            class="cart-item d-flex align-items-center justify-content-between mb-3"
+          >
             <div class="d-flex align-items-center gap-3">
-              <img :src="item.image[0]" alt="Ảnh sản phẩm" class="product-thumb" />
+              <img
+                :src="item.image[0]"
+                alt="Ảnh sản phẩm"
+                class="product-thumb"
+              />
               <div>
                 <p class="mb-1 fw-medium">{{ item.name }}</p>
                 <small class="text-muted">Số lượng: {{ item.quantity }}</small>
@@ -255,7 +314,12 @@ const placeOrder = async () => {
             </div>
             <div class="text-end">
               <span class="fw-semibold">
-                {{ ((item.discount || item.price) * item.quantity).toLocaleString("vi-VN") }} ₫
+                {{
+                  (
+                    (item.discount || item.price) * item.quantity
+                  ).toLocaleString("vi-VN")
+                }}
+                ₫
               </span>
             </div>
           </div>
@@ -269,12 +333,17 @@ const placeOrder = async () => {
           <div class="d-flex justify-content-between mb-2">
             <strong>Phí vận chuyển</strong>
             <strong>
-              <span v-if="shippingFee === 0" class="text-success">Miễn phí</span>
+              <span v-if="shippingFee === 0" class="text-success"
+                >Miễn phí</span
+              >
               <span v-else>{{ shippingFee.toLocaleString("vi-VN") }} ₫</span>
             </strong>
           </div>
 
-          <div v-if="discount > 0" class="d-flex justify-content-between text-success mb-2">
+          <div
+            v-if="discount > 0"
+            class="d-flex justify-content-between text-success mb-2"
+          >
             <strong>Giảm giá ({{ appliedCoupon?.code }})</strong>
             <strong>- {{ discount.toLocaleString("vi-VN") }} ₫</strong>
           </div>
@@ -282,15 +351,25 @@ const placeOrder = async () => {
           <hr />
           <div class="d-flex justify-content-between fw-bold fs-5">
             <span>Tổng cộng</span>
-            <span class="text-danger">{{ total.toLocaleString("vi-VN") }} ₫</span>
+            <span class="text-danger"
+              >{{ total.toLocaleString("vi-VN") }} ₫</span
+            >
           </div>
 
           <div class="input-group mt-4">
-            <input type="text" v-model="couponCode" class="form-control" placeholder="Nhập mã giảm giá" />
+            <input
+              type="text"
+              v-model="couponCode"
+              class="form-control"
+              placeholder="Nhập mã giảm giá"
+            />
             <button @click="applyCoupon" class="btn btn-dark">Áp dụng</button>
           </div>
 
-          <button @click="placeOrder" class="btn btn-success w-100 mt-3 fw-bold py-2">
+          <button
+            @click="placeOrder"
+            class="btn btn-success w-100 mt-3 fw-bold py-2"
+          >
             ĐẶT HÀNG NGAY
           </button>
         </div>

@@ -3,6 +3,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const selectedName = ref("")
 const selectedId = ref(null)
 const category = ref([])
@@ -11,7 +16,7 @@ const form = ref({ name: "", price: "", discount: "", quantity: "", status: "", 
 
 const readCategory = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/categories')
+        const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig)
         category.value = res.data
     } catch (err) {
         console.error('err: ', err)
@@ -20,7 +25,7 @@ const readCategory = async () => {
 
 const readproduct = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/products')
+        const res = await axios.get(`${API_URL}/products`, ngrokHeaderConfig)
         products.value = res.data
     } catch (err) {
         console.error('err: ', err)
@@ -35,7 +40,7 @@ const askDelete = (id, name) => {
 const confirmDelete = async () => {
     if (!selectedId.value) return
     try {
-        await axios.delete(`http://localhost:3000/products/${selectedId.value}`)
+        await axios.delete(`${API_URL}/products/${selectedId.value}`, ngrokHeaderConfig)
         products.value = products.value.filter(c => c.id !== selectedId.value)
         selectedId.value = null
         selectedName.value = ""
@@ -88,7 +93,7 @@ const addProduct = async () => {
     }
 
     try {
-        const res = await axios.post('http://localhost:3000/products', form.value)
+        const res = await axios.post(`${API_URL}/products`, form.value, ngrokHeaderConfig)
         products.value.push(res.data)
         Swal.fire({
             icon: 'success',
@@ -145,7 +150,7 @@ const editProduct = async () => {
         return
     }
     try {
-        const res = await axios.put(`http://localhost:3000/products/${selectedId.value}`, form.value)
+        const res = await axios.put(`${API_URL}/products/${selectedId.value}`, form.value, ngrokHeaderConfig)
 
         const index = products.value.findIndex((p) => p.id === selectedId.value)
         if (index !== -1) {

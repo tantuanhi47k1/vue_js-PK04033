@@ -22,6 +22,11 @@ const totalRevenue = computed(() =>
   orders.value.reduce((sum, order) => sum + parseFloat(order.total || 0), 0)
 );
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -48,7 +53,7 @@ const chartOptions = ref({
 
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:3000/orders");
+    const response = await axios.get(`${API_URL}/orders`, ngrokHeaderConfig);
     orders.value = response.data || [];
 
     // Gom doanh thu theo ngày

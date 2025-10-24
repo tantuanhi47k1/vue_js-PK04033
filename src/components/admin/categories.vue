@@ -3,6 +3,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const category = ref([]);
 const selectedId = ref(null)
 const selectedName = ref("")
@@ -10,7 +15,7 @@ const form = ref({ nameCategory: "", image: "" })
 
 const fetchCategory = async () => {
     try {
-        const res = await axios.get('http://localhost:3000/categories');
+        const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig);
         category.value = res.data
     } catch (err) {
         console.error("Fetch posts error:", err)
@@ -25,7 +30,7 @@ const askDelete = (id, name) => {
 const confirmDelete = async () => {
     if (!selectedId.value) return
     try {
-        await axios.delete(`http://localhost:3000/categories/${selectedId.value}`)
+        await axios.delete(`${API_URL}/categories/${selectedId.value}`, ngrokHeaderConfig)
         category.value = category.value.filter(c => c.id !== selectedId.value)
         selectedId.value = null
         selectedName.value = ""
@@ -71,7 +76,7 @@ const addCategory = async () => {
         })
     } else {
         try {
-            const res = await axios.post('http://localhost:3000/categories', form.value)
+            const res = await axios.post(`${API_URL}/categories`, form.value, ngrokHeaderConfig)
             category.value.push(res.data)
             Swal.fire({
                 icon: 'success',
@@ -109,7 +114,7 @@ const editCategory = async () => {
     if (!selectedId.value) return
 
     try {
-        const res = await axios.put(`http://localhost:3000/categories/${selectedId.value}`, form.value)
+        const res = await axios.put(`${API_URL}/categories/${selectedId.value}`, form.value, ngrokHeaderConfig)
 
         const index = category.value.findIndex((c) => c.id === selectedId.value)
         if (index !== -1) {

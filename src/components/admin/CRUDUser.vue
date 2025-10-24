@@ -8,9 +8,14 @@ const formUser = ref({ fullname: "", email: "", phone: "", address: "", role: ""
 const isEditing = ref(false)
 const editingId = ref(null)
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const readUser = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/user')
+    const res = await axios.get(`${API_URL}/user`, ngrokHeaderConfig)
     users.value = res.data
   } catch (err) {
     console.log("Fetch posts error:", err)
@@ -42,7 +47,7 @@ const removeUser = (user) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/user/${user.id}`)
+        await axios.delete(`${API_URL}/user/${user.id}`, ngrokHeaderConfig)
         users.value = users.value.filter(u => u.id !== user.id)
         Swal.fire({
           icon: 'success',
@@ -70,7 +75,7 @@ const createUser = async () => {
     return
   }
   try {
-    const res = await axios.post("http://localhost:3000/user", formUser.value)
+    const res = await axios.post(`${API_URL}/user`, formUser.value, ngrokHeaderConfig)
     users.value.push(res.data)
     Swal.fire({
       icon: 'success',
@@ -103,7 +108,7 @@ const updateUser = async () => {
     return
   }
   try {
-    const res = await axios.put(`http://localhost:3000/user/${editingId.value}`, formUser.value)
+    const res = await axios.put(`${API_URL}/user/${editingId.value}`, formUser.value, ngrokHeaderConfig)
     const index = users.value.findIndex(p => p.id === editingId.value)
     if (index !== -1) users.value[index] = res.data
     Swal.fire({

@@ -3,6 +3,11 @@ import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const user = ref({
   id: null,
   fullname: "",
@@ -47,7 +52,7 @@ watch(
 
 const saveChanges = async () => {
   try {
-    await axios.put(`http://localhost:3000/user/${user.value.id}`, user.value);
+    await axios.put(`${API_URL}/user/${user.value.id}`, user.value, ngrokHeaderConfig);
     localStorage.setItem("loggedInUser", JSON.stringify(user.value));
 
     Swal.fire({

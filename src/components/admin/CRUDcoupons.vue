@@ -3,6 +3,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+const ngrokHeaderConfig = {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
 const coupons = ref([]);
 const newCoupon = ref({
   code: '',
@@ -17,7 +22,7 @@ const deleteId = ref(null);
 
 const readCoupon = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/coupons');
+    const res = await axios.get(`${API_URL}/coupons`, ngrokHeaderConfig);
     coupons.value = res.data;
   } catch (err) {
     console.error('Lỗi khi tải mã giảm giá:', err);
@@ -40,7 +45,7 @@ const addCoupon = async () => {
   if (error) return alert(error);
 
   try {
-    await axios.post('http://localhost:3000/coupons', newCoupon.value);
+    await axios.post(`${API_URL}/coupons`, newCoupon.value, ngrokHeaderConfig);
     Swal.fire('Thêm mã giảm giá thành công!', '', 'success');
     Object.keys(newCoupon.value).forEach(k => (newCoupon.value[k] = ''));
     newCoupon.value.type = 'percent';
@@ -61,7 +66,7 @@ const updateCoupon = async () => {
   try {
     editCouponData.value.type = 'percent';
     await axios.put(
-      `http://localhost:3000/coupons/${editCouponData.value.id}`,
+      `${API_URL}/coupons/${editCouponData.value.id}`, ngrokHeaderConfig,
       editCouponData.value
     );
     Swal.fire('Cập nhật thành công!', '', 'success');
@@ -77,7 +82,7 @@ const openDeleteModal = (id) => {
 
 const deleteCoupon = async () => {
   try {
-    await axios.delete(`http://localhost:3000/coupons/${deleteId.value}`);
+    await axios.delete(`${API_URL}/coupons/${deleteId.value}`, ngrokHeaderConfig);
     Swal.fire('Xoá mã giảm giá thành công!', '', 'success');
     await readCoupon();
   } catch (err) {

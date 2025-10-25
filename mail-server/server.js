@@ -8,10 +8,14 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.post('/send-mail', async (req, res) => {
-  const { to, subject, text } = req.body;
+  const { to, subject, text, html } = req.body;
 
-  if (!to || !subject || !text) {
-    return res.status(400).json({ success: false, message: 'Thiếu thông tin gửi mail' });
+  if (!to || !subject) {
+    return res.status(400).json({ success: false, message: 'Thiếu thông tin người nhận hoặc tiêu đề' });
+  }
+
+  if (!text && !html) {
+    return res.status(400).json({ success: false, message: 'Thiếu nội dung mail (text hoặc html)' });
   }
 
   const transporter = nodemailer.createTransport({
@@ -20,18 +24,20 @@ app.post('/send-mail', async (req, res) => {
     secure: true,
     auth: {
       user: 'ttuanndz47@gmail.com',
-      pass: 'hvtz kmjh wpvt zama', 
+      pass: 'khlo upfj yyos xqbm',
     },
   });
 
   try {
-    const info = await transporter.sendMail({
+    const mailOptions = {
       from: '"KaynStyle" <ttuanndz47@gmail.com>',
       to,
       subject,
-      text,
-      html: `<p>${text}</p>`,
-    });
+      text: text || 'Vui lòng xem nội dung HTML để biết chi tiết.',
+      html: html || `<p>${text}</p>`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
     console.log('Email sent:', info.messageId);
     res.json({ success: true, message: 'Email đã gửi thành công!' });
   } catch (error) {
@@ -40,4 +46,4 @@ app.post('/send-mail', async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log('Server chạy trên port 3001'));
+app.listen(3001, () => console.log('Mail server chạy trên port 3001'));

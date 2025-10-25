@@ -28,6 +28,9 @@ const ngrokHeaderConfig = {
   headers: { "ngrok-skip-browser-warning": "true" },
 };
 
+const ADMIN_EMAIL = "ttuanndz47@gmail.com"; 
+const MAIL_SERVER_URL = "http://localhost:3001/send-mail";
+
 const total = computed(() => {
   const finalTotal = subtotal.value - discount.value + shippingFee.value;
   return finalTotal > 0 ? finalTotal : 0;
@@ -126,6 +129,143 @@ const applyCoupon = async () => {
   }
 };
 
+const sendEmail = async (mailData) => {
+  try {
+    await axios.post(MAIL_SERVER_URL, {
+      to: mailData.to,
+      subject: mailData.subject,
+      html: mailData.html,
+    });
+    console.log(`Email xác nhận đã gửi tới ${mailData.to}`);
+  } catch (error) {
+    console.error(`Lỗi khi gửi mail tới ${mailData.to}:`, error);
+  }
+};
+
+const formatOrderToHTML = (order) => {
+  const formatCurrency = (value) => (value || 0).toLocaleString("vi-VN") + " ₫";
+  const orderDate = new Date(order.orderDate).toLocaleString("vi-VN");
+
+  const productRows = order.products
+    .map(
+      (item) => `
+    <tr style="border-bottom: 1px solid #eee;">
+      <td style="padding: 12px; vertical-align: top;">
+        <img src="${item.image[0]}" alt="${
+        item.name
+      }" width="60" style="border-radius: 8px; margin-right: 12px; vertical-align: middle;">
+        ${item.name}
+      </td>
+      <td style="padding: 12px; vertical-align: top; text-align: center;">${
+        item.quantity
+      }</td>
+      <td style="padding: 12px; vertical-align: top; text-align: right; font-weight: 500;">${formatCurrency(
+        (item.discount || item.price) * item.quantity
+      )}</td>
+    </tr>
+  `
+    )
+    .join("");
+
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 20px auto; border: 1px solid #ddd; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #f9f9f9; padding: 24px; text-align: center;">
+        <h1 style="color: #333; margin: 0;">KaynStyle</h1>
+        <h2 style="color: #555; margin: 10px 0 0; font-weight: 500;">Cảm ơn bạn đã đặt hàng!</h2>
+      </div>
+      
+      <div style="padding: 24px; line-height: 1.6;">
+        <p>Xin chào <strong>${order.customerInfo.fullname}</strong>,</p>
+        <p>Đơn hàng của bạn đã được xác nhận. Chúng tôi sẽ xử lý và giao hàng cho bạn trong thời gian sớm nhất.</p>
+        
+        <div style="background-color: #f9f9f9; border-radius: 8px; padding: 16px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Thông tin đơn hàng</h3>
+          <p style="margin: 4px 0;"><strong>Mã đơn hàng:</strong> ${
+            order.id || "Đang xử lý"
+          }</p>
+          <p style="margin: 4px 0;"><strong>Ngày đặt hàng:</strong> ${orderDate}</p>
+          <p style="margin: 4px 0;"><strong>Trạng thái:</strong> ${
+            order.status
+          }</p>
+          <p style="margin: 4px 0;"><strong>Phương thức thanh toán:</strong> ${
+            order.paymentMethod
+          }</p>
+        </div>
+
+        <h3 style="margin-top: 24px;">Thông tin giao hàng</h3>
+        <p style="margin: 4px 0;"><strong>Người nhận:</strong> ${
+          order.customerInfo.fullname
+        }</p>
+        <p style="margin: 4px 0;"><strong>Địa chỉ:</strong> ${
+          order.customerInfo.address
+        }</p>
+        <p style="margin: 4px 0;"><strong>Số điện thoại:</strong> ${
+          order.customerInfo.phone
+        }</p>
+        ${
+          order.note
+            ? `<p style="margin: 4px 0;"><strong>Ghi chú:</strong> ${order.note}</p>`
+            : ""
+        }
+
+        <h3 style="margin-top: 24px; border-bottom: 2px solid #eee; padding-bottom: 8px;">Sản phẩm đã đặt</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
+          <thead style="text-align: left; color: #777;">
+            <tr>
+              <th style="padding: 12px 12px 12px 0;">Sản phẩm</th>
+              <th style="padding: 12px; text-align: center;">Số lượng</th>
+              <th style="padding: 12px 0 12px 12px; text-align: right;">Giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${productRows}
+          </tbody>
+        </table>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; line-height: 1.8;">
+          <tbody>
+            <tr>
+              <td style="padding: 4px;">Tạm tính:</td>
+              <td style="padding: 4px; width: 30%; font-weight: 500;">${formatCurrency(
+                order.subtotal
+              )}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px;">Phí vận chuyển:</td>
+              <td style="padding: 4px; font-weight: 500;">${formatCurrency(
+                order.shippingFee
+              )}</td>
+            </tr>
+            ${
+              order.discount > 0
+                ? `
+            <tr>
+              <td style="padding: 4px;">Giảm giá (${order.coupon}):</td>
+              <td style="padding: 4px; color: #28a745; font-weight: 500;">- ${formatCurrency(
+                order.discount
+              )}</td>
+            </tr>`
+                : ""
+            }
+            <tr style="font-weight: bold; font-size: 1.2em; border-top: 2px solid #ddd; margin-top: 5px;">
+              <td style="padding: 12px 4px 4px;">Tổng cộng:</td>
+              <td style="padding: 12px 4px 4px; color: #d9534f;">${formatCurrency(
+                order.total
+              )}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="background-color: #f9f9f9; padding: 24px; text-align: center; color: #777; font-size: 12px;">
+        <p style="margin: 0;">© ${new Date().getFullYear()} KaynStyle. Đã đăng ký Bản quyền.</p>
+      </div>
+    </div>
+  `;
+};
+
 const placeOrder = async () => {
   if (
     !userInfo.value.fullname ||
@@ -137,9 +277,21 @@ const placeOrder = async () => {
   }
 
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  
+  const customerEmail = loggedInUser?.email;
+
+  if (!customerEmail) {
+    console.warn(
+      "Không tìm thấy email người dùng. Sẽ không gửi mail cho khách hàng."
+    );
+  }
+
   const orderDetails = {
     userId: loggedInUser?.id || null,
-    customerInfo: userInfo.value,
+    customerInfo: {
+      ...userInfo.value,
+      email: customerEmail || null,
+    },
     products: cart.value,
     subtotal: subtotal.value,
     shippingFee: shippingFee.value,
@@ -153,23 +305,61 @@ const placeOrder = async () => {
   };
 
   try {
-    await axios.post(`${API_URL}/orders`, orderDetails, ngrokHeaderConfig);
+    const orderResponse = await axios.post(
+      `${API_URL}/orders`,
+      orderDetails,
+      ngrokHeaderConfig
+    );
+    
+    const newOrder = orderResponse.data;
 
     for (const item of cart.value) {
       try {
-        const response = await axios.get(`${API_URL}/products/${item.productId}`, ngrokHeaderConfig);
+        const response = await axios.get(
+          `${API_URL}/products/${item.productId}`,
+          ngrokHeaderConfig
+        );
         const product = response.data;
         const newQuantity = product.quantity - item.quantity;
 
-        await axios.patch(`${API_URL}/products/${item.productId}`, {
-          quantity: newQuantity,
-        }, ngrokHeaderConfig);
-
+        await axios.patch(
+          `${API_URL}/products/${item.productId}`,
+          {
+            quantity: newQuantity,
+          },
+          ngrokHeaderConfig
+        );
       } catch (error) {
-        console.error(`Lỗi khi cập nhật số lượng cho sản phẩm ${item.productId}:`, error);
+        console.error(
+          `Lỗi khi cập nhật số lượng cho sản phẩm ${item.productId}:`,
+          error
+        );
       }
     }
-    
+
+
+    const emailHtml = formatOrderToHTML(newOrder);
+
+    if (customerEmail) {
+      sendEmail({
+        to: customerEmail,
+        subject: `[KaynStyle] Xác nhận đơn hàng #${newOrder.id}`,
+        html: emailHtml,
+      });
+    }
+
+    const adminHtml = `
+      <h2 style="color: #d9534f; font-family: Arial, sans-serif;">Có đơn hàng mới!</h2>
+      <p style="font-family: Arial, sans-serif;">Một đơn hàng mới vừa được đặt trên website KaynStyle.</p>
+      <hr>
+      ${emailHtml}
+    `;
+    sendEmail({
+      to: ADMIN_EMAIL,
+      subject: `[ĐƠN HÀNG MỚI] Khách ${newOrder.customerInfo.fullname} vừa đặt hàng #${newOrder.id}`,
+      html: adminHtml,
+    });
+
     await store.dispatch("cart/deleteAllCart");
 
     Swal.fire({

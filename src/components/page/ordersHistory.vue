@@ -53,7 +53,7 @@ const cancelOrder = async (orderId) => {
 
   if (result.isConfirmed) {
     try {
-      await axios.patch(`${API_URL}/orders/${orderId}`, { status: 'Cancelled' }, ngrokHeaderConfig);
+      await axios.patch(`${API_URL}/orders/${orderId}`, { status: 'Đã huỷ' }, ngrokHeaderConfig);
 
       fetchOrders();
 

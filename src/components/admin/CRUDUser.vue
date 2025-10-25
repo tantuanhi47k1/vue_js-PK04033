@@ -10,7 +10,7 @@ const editingId = ref(null)
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const ngrokHeaderConfig = {
-    headers: { 'ngrok-skip-browser-warning': 'true' },
+  headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
 const readUser = async () => {
@@ -18,13 +18,11 @@ const readUser = async () => {
     const res = await axios.get(`${API_URL}/user`, ngrokHeaderConfig)
     users.value = res.data
   } catch (err) {
-    console.log("Fetch posts error:", err)
+    console.error("Fetch posts error:", err)
   }
 }
 
-// === START: PHẦN ĐÃ CẬP NHẬT ===
 const removeUser = (user) => {
-  // Kiểm tra nếu role là 'admin' thì không cho xóa
   if (user.role === 'admin') {
     Swal.fire({
       icon: 'error',
@@ -32,7 +30,7 @@ const removeUser = (user) => {
       text: 'Bạn không được phép xoá tài khoản Admin.',
       confirmButtonColor: '#000'
     });
-    return; // Dừng hàm tại đây
+    return;
   }
 
   Swal.fire({
@@ -56,15 +54,15 @@ const removeUser = (user) => {
           confirmButtonColor: '#000'
         })
       } catch (err) {
-        console.error("err: ", err)
+        console.error("Delete user error:", err)
       }
     }
   })
 }
-// === END: PHẦN ĐÃ CẬP NHẬT ===
 
 const createUser = async () => {
-  if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone || !formUser.value.address || !formUser.value.role || !formUser.value.password) {
+  if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone ||
+      !formUser.value.address || !formUser.value.role || !formUser.value.password) {
     Swal.fire({
       icon: 'warning',
       title: 'Thiếu thông tin!',
@@ -74,6 +72,7 @@ const createUser = async () => {
     })
     return
   }
+
   try {
     const res = await axios.post(`${API_URL}/user`, formUser.value, ngrokHeaderConfig)
     users.value.push(res.data)
@@ -86,7 +85,7 @@ const createUser = async () => {
     })
     resetForm()
   } catch (err) {
-    console.log("Add user error:", err)
+    console.error("Add user error:", err)
   }
 }
 
@@ -97,7 +96,8 @@ const editUser = (item) => {
 }
 
 const updateUser = async () => {
-  if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone || !formUser.value.address || !formUser.value.role) {
+  if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone ||
+      !formUser.value.address || !formUser.value.role) {
     Swal.fire({
       icon: 'warning',
       title: 'Thiếu thông tin',
@@ -107,6 +107,7 @@ const updateUser = async () => {
     })
     return
   }
+
   try {
     const res = await axios.put(`${API_URL}/user/${editingId.value}`, formUser.value, ngrokHeaderConfig)
     const index = users.value.findIndex(p => p.id === editingId.value)

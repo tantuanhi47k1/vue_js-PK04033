@@ -7,6 +7,7 @@ const form = ref({
   fullname: "",
   email: "",
   password: "",
+  repassword: "",
   phone: "",
   address: "",
   role: "user",
@@ -14,12 +15,21 @@ const form = ref({
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const ngrokHeaderConfig = {
-    headers: { 'ngrok-skip-browser-warning': 'true' },
+  headers: { "ngrok-skip-browser-warning": "true" },
 };
 
 const handleSubmit = async () => {
-  let users = JSON.parse(localStorage.getItem("users")) || [];
+  if (form.value.password !== form.value.repassword) {
+    Swal.fire({
+      icon: "error",
+      title: "Mật khẩu không khớp!",
+      text: "Vui lòng nhập lại mật khẩu giống nhau!",
+      confirmButtonColor: "#000",
+    });
+    return;
+  }
 
+  let users = JSON.parse(localStorage.getItem("users")) || [];
   if (users.some((u) => u.email === form.value.email)) {
     Swal.fire({
       icon: "error",
@@ -32,12 +42,14 @@ const handleSubmit = async () => {
 
   try {
     const res = await axios.post(`${API_URL}/user`, form.value, ngrokHeaderConfig);
-    if (res.status === 201) {
+
+    if (res.status === 201 || res.status === 200) {
       users.push(form.value);
       localStorage.setItem("users", JSON.stringify(users));
+
       Swal.fire({
         icon: "success",
-        title: "Tạo Tài Khoản Thành Công",
+        title: "Tạo Tài Khoản Thành Công!",
         text: "Bạn đã đăng ký thành công!",
         showConfirmButton: true,
         confirmButtonText: "Đến Đăng Nhập",
@@ -45,20 +57,22 @@ const handleSubmit = async () => {
       }).then(() => {
         window.location.href = "/login";
       });
+
       form.value = {
         fullname: "",
         email: "",
         password: "",
+        repassword: "",
         phone: "",
         address: "",
         role: "user",
       };
     }
   } catch (err) {
-    console.error("Err: ", err);
+    console.error("Err:", err);
     Swal.fire({
       icon: "error",
-      title: "Đăng Ký Thất Bại",
+      title: "Đăng ký thất bại!",
       text: "Vui lòng thử lại sau!",
       confirmButtonColor: "#000",
     });

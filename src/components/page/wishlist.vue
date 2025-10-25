@@ -32,24 +32,32 @@ const removeFromWishlist = (productId) => {
 };
 
 const addToCart = (product) => {
-  store.dispatch('cart/addProductToCart', product);
-  Swal.fire({
-    icon: 'success',
-    title: 'Đã thêm vào giỏ hàng!',
-    text: `${product.name} đã được thêm vào giỏ hàng.`,
-    showConfirmButton: false,
-    timer: 1500
-  });
+  if (product.quantity > 0) {
+    store.dispatch('cart/addProductToCart', product);
+    Swal.fire({
+      icon: 'success',
+      title: 'Đã thêm vào giỏ hàng!',
+      text: `${product.name} đã được thêm vào giỏ hàng.`,
+      showConfirmButton: false,
+      timer: 1500
+    });
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Sản phẩm đã hết hàng!',
+      confirmButtonColor: '#000',
+    });
+  }
 };
 
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  return Number(price).toLocaleString('vi-VN') + ' ₫';
 };
 </script>
 
 <template>
   <div class="container my-5">
-    <h2 class="mb-4" style="text-align: center; margin-top: 130px;">Sản phẩm yêu thích 💖</h2>
+    <h2 class="mb-4 text-center" style="margin-top: 130px;">Sản phẩm yêu thích 💖</h2>
 
     <div v-if="wishlist.length === 0" class="text-center mt-5">
       <p class="fs-5">Danh sách yêu thích của bạn đang trống.</p>
@@ -57,17 +65,23 @@ const formatPrice = (price) => {
     </div>
 
     <div v-else class="row g-4">
-      <div class="col-md-3" v-for="product in wishlist" :key="product.id">
-        <div class="card h-100 shadow-sm border-0" style="margin-top: 20px;">
-          <router-link :to="`/productDetail/${product.id}`">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3" v-for="product in wishlist" :key="product.id">
+        <div class="card h-100 shadow-sm border-0 product-card">
+          <router-link :to="`/productDetail/${product.id}`" class="text-decoration-none text-dark">
             <img :src="product.image[0]" class="card-img-top" :alt="product.name" style="height: 250px; object-fit: cover;">
           </router-link>
-          <div class="card-body d-flex flex-column">
-            <h6 class="card-title">{{ product.name }}</h6>
-            <p class="card-text text-danger fw-bold mt-auto">{{ formatPrice(product.discount || product.price) }}</p>
-            <div class="d-grid gap-2 d-md-flex justify-content-start mt-2">
-                <button @click="addToCart(product)" class="btn btn-primary btn-sm">Thêm vào giỏ</button>
-                <button @click="removeFromWishlist(product.id)" class="btn btn-outline-danger btn-sm">Xóa</button>
+          <div class="card-body text-center d-flex flex-column">
+            <h6 class="fw-semibold mb-1">{{ product.name }}</h6>
+            <template v-if="product.discount && product.discount < product.price">
+              <p class="text-muted text-decoration-line-through small mb-1">{{ formatPrice(product.price) }}</p>
+              <p class="text-danger fw-bold mb-2">{{ formatPrice(product.discount) }}</p>
+            </template>
+            <template v-else>
+              <p class="text-danger fw-bold mb-2">{{ formatPrice(product.price) }}</p>
+            </template>
+            <div class="d-flex justify-content-center gap-2 mt-auto">
+              <button @click="addToCart(product)" class="btn btn-dark btn-sm">Thêm vào giỏ hàng 🛒</button>
+              <button @click="removeFromWishlist(product.id)" class="btn btn-outline-danger btn-sm">Xoá</button>
             </div>
           </div>
         </div>
@@ -75,3 +89,12 @@ const formatPrice = (price) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.product-card img {
+  transition: 0.3s ease;
+}
+.product-card:hover img {
+  transform: scale(1.05);
+}
+</style>

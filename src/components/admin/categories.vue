@@ -114,7 +114,12 @@ const editCategory = async () => {
     if (!selectedId.value) return
 
     try {
-        const res = await axios.put(`${API_URL}/categories/${selectedId.value}`, form.value, ngrokHeaderConfig)
+        const res = await axios.put(
+            `${API_URL}/categories/${selectedId.value}`,
+            form.value,
+            { headers: { 'ngrok-skip-browser-warning': 'true', 'Content-Type': 'application/json' } }
+        );
+
 
         const index = category.value.findIndex((c) => c.id === selectedId.value)
         if (index !== -1) {
@@ -131,6 +136,7 @@ const editCategory = async () => {
 
         selectedId.value = null
         form.value = { nameCategory: '', image: '' }
+        resetForm();
     } catch (err) {
         console.error('Edit category error:', err)
     }
@@ -174,24 +180,31 @@ onMounted(fetchCategory)
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-if="category.length" v-for="items, index in category" :key="items.id">
-                        <td>{{ index + 1 }}</td>
-                        <td><img :src="items.image" alt="" width="120px"></td>
-                        <td>{{ items.nameCategory }}</td>
-                        <td>
-                            <button class="btn btn-outline-warning btn-sm me-2" @click="askEdit(items)"
-                                data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>
-                            <button @click="askDelete(items.id, items.nameCategory)"
-                                class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#deleteModal"><i class="fa fa-trash"></i></button>
-                        </td>
-                    </tr>
+                    <template v-if="category.length">
+                        <tr v-for="(items, index) in category" :key="items.id">
+                            <td>{{ index + 1 }}</td>
+                            <td><img :src="items.image" alt="" width="120px"></td>
+                            <td>{{ items.nameCategory }}</td>
+                            <td>
+                                <button class="btn btn-outline-warning btn-sm me-2" @click="askEdit(items)"
+                                    data-bs-toggle="modal" data-bs-target="#editModal">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm"
+                                    @click="askDelete(items.id, items.nameCategory)" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
                     <tr v-else>
                         <td colspan="8" class="text-center text-muted py-3">
                             Chưa có sản phẩm nào
                         </td>
                     </tr>
                 </tbody>
+
             </table>
         </div>
     </div>

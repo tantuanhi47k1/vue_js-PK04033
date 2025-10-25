@@ -51,26 +51,36 @@ watch(
 );
 
 const saveChanges = async () => {
+  if (!user.value.fullname || !user.value.phone || !user.value.address) {
+    Swal.fire({
+      icon: "warning",
+      title: "Thiếu thông tin!",
+      text: "Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ.",
+      confirmButtonColor: "#000",
+    });
+    return;
+  }
+
   try {
     await axios.put(`${API_URL}/user/${user.value.id}`, user.value, ngrokHeaderConfig);
     localStorage.setItem("loggedInUser", JSON.stringify(user.value));
-
     Swal.fire({
       icon: "success",
       title: "Cập nhật thành công!",
-      text: "Thông tin của bạn đã được cập nhật.",
+      text: "Thông tin của bạn đã được lưu.",
       confirmButtonColor: "#000",
     });
   } catch (err) {
     console.error("Update error:", err);
     Swal.fire({
       icon: "error",
-      title: "Cập nhật thất bại!",
-      text: "Đã có lỗi xảy ra khi cập nhật thông tin.",
+      title: "Lỗi!",
+      text: "Không thể cập nhật thông tin, vui lòng thử lại.",
       confirmButtonColor: "#000",
     });
   }
 };
+
 </script>
 
 <template>

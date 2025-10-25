@@ -28,16 +28,24 @@ const updateStatus = async (order, newStatus) => {
           const response = await axios.get(`${API_URL}/products/${item.id}`, ngrokHeaderConfig);
           const product = response.data;
           const newQuantity = product.quantity + item.quantity;
-          await axios.patch(`${API_URL}/products/${item.id}`, ngrokHeaderConfig, {
-            quantity: newQuantity,
-          });
+
+          await axios.patch(
+            `${API_URL}/products/${item.id}`,
+            { quantity: newQuantity },
+            ngrokHeaderConfig
+          );
         } catch (error) {
           console.error(`Lỗi khi hoàn lại số lượng cho sản phẩm ${item.id}:`, error);
         }
       }
     }
 
-    await axios.patch(`${API_URL}/orders/${order.id}`, ngrokHeaderConfig, { status: newStatus });
+    await axios.patch(
+      `${API_URL}/orders/${order.id}`,
+      { status: newStatus },
+      ngrokHeaderConfig
+    );
+
     order.status = newStatus;
     Swal.fire("Thành công", "Cập nhật trạng thái thành công!", "success");
   } catch (err) {
@@ -45,6 +53,7 @@ const updateStatus = async (order, newStatus) => {
     Swal.fire("Lỗi", "Cập nhật trạng thái thất bại!", "error");
   }
 };
+
 
 const getStatusClass = (status) => {
   switch (status) {

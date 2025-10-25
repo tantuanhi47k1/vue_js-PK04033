@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const ngrokHeaderConfig = {
-    headers: { 'ngrok-skip-browser-warning': 'true' },
+  headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
 const coupons = ref([]);
@@ -66,9 +66,11 @@ const updateCoupon = async () => {
   try {
     editCouponData.value.type = 'percent';
     await axios.put(
-      `${API_URL}/coupons/${editCouponData.value.id}`, ngrokHeaderConfig,
-      editCouponData.value
+      `${API_URL}/coupons/${editCouponData.value.id}`,
+      editCouponData.value,
+      ngrokHeaderConfig
     );
+
     Swal.fire('Cập nhật thành công!', '', 'success');
     await readCoupon();
   } catch (err) {
@@ -98,11 +100,7 @@ onMounted(readCoupon);
     <h2 class="text-center fw-bold mb-4">Quản Lý Mã Giảm Giá (%) 🎫</h2>
 
     <div class="text-end mb-3">
-      <button
-        class="btn btn-success px-3"
-        data-bs-toggle="modal"
-        data-bs-target="#addCouponModal"
-      >
+      <button class="btn btn-success px-3" data-bs-toggle="modal" data-bs-target="#addCouponModal">
         <i class="fa fa-plus me-1"></i> Thêm mã giảm giá
       </button>
     </div>
@@ -127,22 +125,14 @@ onMounted(readCoupon);
             <td><strong>{{ item.code }}</strong></td>
             <td>{{ item.discount }}%</td>
             <td>{{ Number(item.conditions).toLocaleString('vi-VN') }} ₫</td>
-            <td>{{ item.expiry }}</td>
+            <td>{{ new Date(item.expiry).toLocaleDateString('vi-VN') }}</td>
             <td>
-              <button
-                class="btn btn-outline-warning btn-sm me-2"
-                data-bs-toggle="modal"
-                data-bs-target="#editModal"
-                @click="openEditModal(item)"
-              >
+              <button class="btn btn-outline-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editModal"
+                @click="openEditModal(item)">
                 <i class="fa fa-edit"></i>
               </button>
-              <button
-                class="btn btn-outline-danger btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#deleteModal"
-                @click="openDeleteModal(item.id)"
-              >
+              <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                @click="openDeleteModal(item.id)">
                 <i class="fa fa-trash"></i>
               </button>
             </td>
@@ -177,7 +167,8 @@ onMounted(readCoupon);
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Giảm giá (%)</label>
-                  <input v-model="newCoupon.discount" type="number" min="1" max="100" class="form-control" placeholder="Từ 1% đến 100%" />
+                  <input v-model="newCoupon.discount" type="number" min="1" max="100" class="form-control"
+                    placeholder="Từ 1% đến 100%" />
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Đơn tối thiểu (₫)</label>
@@ -271,18 +262,22 @@ h2 {
   color: #222;
   letter-spacing: 0.5px;
 }
+
 .table-hover tbody tr:hover {
   background-color: #f8f9fa;
   transition: 0.3s;
 }
+
 .modal-content {
   animation: fadeIn 0.3s ease-in-out;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

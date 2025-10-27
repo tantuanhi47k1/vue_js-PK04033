@@ -26,7 +26,7 @@ import product from "../src/components/admin/product.vue";
 import readProduct from "../src/components/admin/readProduct.vue";
 import CRUDcoupons from "@/components/admin/CRUDcoupons.vue";
 import statistics from "@/components/admin/statistics.vue";
-
+import manageComments from "@/components/admin/manageComments.vue";
 import NotFound from "../src/components/page/NotFound.vue";
 
 const routes = [
@@ -44,7 +44,7 @@ const routes = [
       { path: "cart", component: cart },
       { path: 'checkout', component: checkout },
       { path: 'ordersHistory', component: ordersHistory },
-      { path: 'wishlist', component: wishlist},
+      { path: 'wishlist', component: wishlist },
       { path: 'contact', component: contact }
     ],
   },
@@ -60,7 +60,8 @@ const routes = [
       { path: "readProduct/:id", component: readProduct },
       { path: 'orders', component: manageOrders },
       { path: 'CRUDcoupons', component: CRUDcoupons },
-      { path: 'statistics', component: statistics }
+      { path: 'statistics', component: statistics },
+      { path: "manageComments", component: manageComments}
     ],
   },
   {
@@ -80,14 +81,14 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAdmin) {
     if (!loggedUser) {
-      next("/login"); 
+      next("/login");
     } else if (loggedUser.role !== "admin") {
-      next("/404"); 
+      next("/404");
     } else {
-      next(); 
+      next();
     }
   } else {
-    next(); 
+    next();
   }
 });
 

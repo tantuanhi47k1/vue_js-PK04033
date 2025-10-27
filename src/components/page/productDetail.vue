@@ -13,9 +13,81 @@ const categories = ref([]);
 const relatedProducts = ref([]);
 const router = useRouter();
 
+const comments = ref([]);
+const newComment = ref('');
+const userInfo = ref(null);
+
+const reviews = ref([]);
+const averageRating = ref(0);
+
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const ngrokHeaderConfig = {
-    headers: { 'ngrok-skip-browser-warning': 'true' },
+  headers: { 'ngrok-skip-browser-warning': 'true' },
+};
+
+// Đánh giá
+const fetchReviews = async () => {
+  if (!route.params.id) return;
+  try {
+    const response = await axios.get(
+      `${API_URL}/reviews?productId=${route.params.id}`,
+      ngrokHeaderConfig
+    );
+    reviews.value = response.data;
+
+    if (reviews.value.length > 0) {
+      const sum = reviews.value.reduce((acc, review) => acc + review.rating, 0);
+      averageRating.value = (sum / reviews.value.length).toFixed(1);
+    } else {
+      averageRating.value = 0;
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải đánh giá:', error);
+  }
+};
+
+// Bình luận
+const fetchApprovedComments = async () => {
+  if (!route.params.id) return;
+  try {
+    const response = await axios.get(
+      `${API_URL}/comments?productId=${route.params.id}&status=Đã duyệt&_sort=createdAt&_order=desc`,
+      ngrokHeaderConfig
+    );
+    comments.value = response.data;
+  } catch (error) {
+    console.error('Lỗi khi tải bình luận:', error);
+  }
+};
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) {
+    Swal.fire('Lỗi', 'Vui lòng nhập bình luận của bạn.', 'error');
+    return;
+  }
+
+  if (!userInfo.value || !userInfo.value.id || !userInfo.value.fullname) {
+    Swal.fire('Lỗi', 'Lỗi thông tin người dùng. Vui lòng đăng nhập lại.', 'error');
+    return;
+  }
+
+  const commentData = {
+    productId: route.params.id,
+    userId: userInfo.value.id,
+    userName: userInfo.value.fullname,
+    content: newComment.value,
+    createdAt: new Date().toISOString(),
+    status: 'Chờ xử lý',
+    imageUser: userInfo.value.avatar || ''
+  };
+
+  try {
+    await axios.post(`${API_URL}/comments`, commentData, ngrokHeaderConfig);
+    Swal.fire('Thành công', 'Bình luận của bạn đã được gửi và đang chờ phê duyệt!', 'success');
+    newComment.value = '';
+  } catch (error) {
+    Swal.fire('Lỗi', 'Không thể gửi bình luận.', 'error');
+  }
 };
 
 const readProductDetail = async () => {
@@ -24,13 +96,11 @@ const readProductDetail = async () => {
       `${API_URL}/products/${route.params.id}`, ngrokHeaderConfig
     );
     product.value = res.data;
-
     await readRelatedProducts();
   } catch (err) {
     console.error("Err: ", err);
   }
 };
-
 
 const readCategories = async () => {
   try {
@@ -89,16 +159,28 @@ const toggleWishlist = (product) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   readProductDetail();
   readCategories();
+
+  const user = localStorage.getItem('loggedInUser');
+  if (user) {
+    userInfo.value = JSON.parse(user);
+  }
+
+  await fetchApprovedComments();
+  await fetchReviews();
 });
 
 watch(
   () => route.params.id,
-  () => {
-    readProductDetail();
-    window.scrollTo(0, 0);
+  async (newId) => {
+    if (newId) {
+      readProductDetail();
+      await fetchApprovedComments();
+      await fetchReviews();
+      window.scrollTo(0, 0);
+    }
   }
 );
 </script>
@@ -200,9 +282,89 @@ watch(
           </div>
         </div>
       </div>
-      <div>
-        <h3>Đánh Giá</h3>
-        <p>(hiện chưa có đánh giá)</p>
+
+      <!-- đánh giá -->
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-md-8 offset-md-2">
+            <div class="reviews-section p-4 bg-white rounded shadow-sm">
+              <h4 class="fw-bold mb-3 text-center">Đánh giá sản phẩm ({{ reviews.length }})</h4>
+
+              <div class="text-center mb-4">
+                <span v-if="averageRating > 0" class="text-warning fs-5">
+                  <i v-for="star in 5" :key="star" class="bi me-1"
+                    :class="star <= Math.round(averageRating) ? 'bi-star-fill' : 'bi-star'"></i>
+                  <span class="ms-2 text-dark fw-semibold">
+                    {{ averageRating }} / 5
+                  </span>
+                </span>
+                <span v-else class="text-muted">Chưa có đánh giá nào</span>
+              </div>
+
+              <hr />
+
+              <div v-if="reviews.length > 0">
+                <div v-for="review in reviews" :key="review.id" class="review-item border-bottom pb-3 mb-3">
+                  <h6 class="fw-bold mb-1">{{ review.userName }}</h6>
+                  <div class="text-warning mb-2">
+                    <i v-for="star in 5" :key="star" class="bi"
+                      :class="star <= review.rating ? 'bi-star-fill' : 'bi-star'"></i>
+                  </div>
+                  <p class="mb-1">{{ review.content }}</p>
+                  <small class="text-muted">
+                    {{ new Date(review.createdAt).toLocaleString('vi-VN') }}
+                  </small>
+                </div>
+              </div>
+
+              <div v-else class="text-center text-muted">
+                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bình luận -->
+      <div class="container mt-5">
+        <div class="row">
+          <div class="col-md-8 offset-md-2">
+            <div v-if="userInfo" class="mb-4">
+              <h4>Để lại bình luận</h4>
+              <form @submit.prevent="submitComment">
+                <div class="mb-3">
+                  <textarea v-model="newComment" class="form-control" rows="4"
+                    placeholder="Viết bình luận của bạn..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+              </form>
+            </div>
+
+            <div v-else class="mb-4">
+              <p>Vui lòng <router-link to="/login">đăng nhập</router-link> để để lại bình luận.</p>
+            </div>
+
+            <div class="comments-list">
+              <h4>Bình luận ({{ comments.length }})</h4>
+              <div v-if="comments.length > 0">
+                <div v-for="comment in comments" :key="comment.id" class="card mb-3">
+                  <div class="card-body"><img
+                      :src="comment.imageUser || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="Avatar"
+                      class="rounded-circle me-3" width="50" height="50" />
+                    <h6 class="card-title fw-bold">{{ comment.userName }}</h6>
+                    <p class="card-text">{{ comment.content }}</p>
+                    <small class="text-muted">
+                      {{ new Date(comment.createdAt).toLocaleString('vi-VN') }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <div v-else>
+                <p>Chưa có bình luận nào cho sản phẩm này.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="mt-5">
         <h3 class="fw-bold mb-4">Sản phẩm liên quan</h3>

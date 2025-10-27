@@ -32,6 +32,9 @@
                     <li class="nav-item">
                         <router-link to="/admin/statistics" class="nav-link" active-class="active-link">📊 Thông Kê</router-link>
                     </li>
+                    <li class="nav-item">
+                        <router-link to="/admin/manageComments" class="nav-link" active-class="active-link">💬 QLý Bình Luận</router-link>
+                    </li>
                 </ul>   
 
                 <div class="mt-auto text-center pt-4 border-top border-secondary">

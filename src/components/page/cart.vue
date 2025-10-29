@@ -1,31 +1,14 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { useStore } from "vuex";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink } from "vue-router";
 import Swal from "sweetalert2";
 
 const store = useStore();
-const router = useRouter();
 
 onMounted(() => {
   store.dispatch("cart/fetchCart");
 });
-
-const handlePaymentSuccess = () => {
-  Swal.fire({
-    icon: "success",
-    title: "Thanh toán thành công!",
-    text: "Cảm ơn bạn đã mua hàng ❤️",
-    showConfirmButton: false,
-    timer: 2000,
-  });
-
-  store.dispatch("cart/deleteAllCart");
-
-  setTimeout(() => {
-    router.push("/");
-  }, 2000);
-};
 
 const cart = computed(() => store.getters["cart/cartItems"]);
 const subtotal = computed(() => store.getters["cart/cartTotal"]);
@@ -130,7 +113,7 @@ const deleteAllCart = () => {
                     }}
                       ₫</span><br />
                     <small class="text-muted text-decoration-line-through">{{ Number(item.price).toLocaleString("vi-VN")
-                      }} ₫</small>
+                    }} ₫</small>
                   </td>
                   <td>
                     <div class="input-group input-group-sm mx-auto" style="width: 120px">
@@ -194,8 +177,8 @@ const deleteAllCart = () => {
               </span>
             </div>
             <RouterLink to="/checkout" class="btn btn-success w-100 mt-4 fw-semibold">
-  Tiến hành Thanh toán
-</RouterLink>
+              Tiến hành Thanh toán
+            </RouterLink>
 
           </div>
         </div>

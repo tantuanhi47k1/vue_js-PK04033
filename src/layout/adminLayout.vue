@@ -1,7 +1,6 @@
 <template>
     <div class="admin-layout d-flex flex-column min-vh-100 bg-light text-dark">
         <div class="d-flex flex-grow-1">
-            <!-- Sidebar -->
             <aside class="sidebar bg-secondary text-white p-3">
                 <router-link class="navbar-brand d-flex align-items-center" to="/">
                     <img src="https://kaynstyle.io.vn/wp-content/uploads/2025/09/logowebsiteKayn-e1758976606143.png"
@@ -44,13 +43,11 @@
                 </div>
             </aside>
 
-            <!-- Main content -->
             <main class="flex-fill p-4 bg-white rounded-start shadow-sm">
                 <router-view />
             </main>
         </div>
 
-        <!-- Footer -->
         <footer class="admin-footer text-center py-3 mt-auto border-top">
             <p class="mb-0 small text-secondary">
                 &copy; 2025 <b>KaynStyle Admin</b> — All rights reserved.
@@ -60,13 +57,11 @@
 </template>
 
 <style scoped>
-/* ====== GENERAL ====== */
 .admin-layout {
     font-family: "Poppins", sans-serif;
     background-color: #f9f9f9;
 }
 
-/* ====== SIDEBAR ====== */
 .sidebar {
     width: 230px;
     min-height: 100vh;
@@ -100,7 +95,6 @@
     font-weight: bold;
 }
 
-/* ====== MAIN CONTENT ====== */
 main {
     background-color: #fff;
     border-radius: 12px;
@@ -108,7 +102,6 @@ main {
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ====== FOOTER ====== */
 .admin-footer {
     background: #111;
     color: #bbb;
@@ -118,7 +111,6 @@ main {
     color: #10e5f8;
 }
 
-/* ====== RESPONSIVE ====== */
 @media (max-width: 991px) {
     .d-flex {
         flex-direction: column;

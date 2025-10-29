@@ -14,6 +14,7 @@ const category = ref([])
 const products = ref([])
 const form = ref({ name: "", price: "", discount: "", quantity: "", status: "", description: "", categoryId: "", image: [], lowStockThreshold: 5 })
 
+// đọc dm
 const readCategory = async () => {
     try {
         const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig)
@@ -23,6 +24,7 @@ const readCategory = async () => {
     }
 }
 
+// đọc sp
 const readproduct = async () => {
     try {
         const res = await axios.get(`${API_URL}/products`, ngrokHeaderConfig)
@@ -37,6 +39,7 @@ const askDelete = (id, name) => {
     selectedName.value = name
 }
 
+// xoá sp
 const confirmDelete = async () => {
     if (!selectedId.value) return
     try {
@@ -56,6 +59,7 @@ const confirmDelete = async () => {
     }
 }
 
+// tải img
 const handleImageUpload = (e) => {
     const files = e.target.files;
     if (!files.length) return;
@@ -71,6 +75,7 @@ const handleImageUpload = (e) => {
     });
 };
 
+// thêm sp
 const addProduct = async () => {
     if (
         !form.value.name ||
@@ -108,6 +113,7 @@ const addProduct = async () => {
     }
 }
 
+// sửa sp
 const askEdit = (item) => {
     selectedId.value = item.id
     form.value = {
@@ -123,6 +129,7 @@ const askEdit = (item) => {
     }
 }
 
+// img sửa
 const handleEditImage = (e) => {
     const files = e.target.files
     if (!files.length) return
@@ -138,6 +145,7 @@ const handleEditImage = (e) => {
     })
 }
 
+// lưu sửa sp
 const editProduct = async () => {
     if (!selectedId.value) {
         Swal.fire({
@@ -266,7 +274,7 @@ onMounted(() => {
             </table>
         </div>
 
-        <!-- Modal thêm sản phẩm -->
+        <!-- thêm sp -->
         <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -337,7 +345,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Modal sửa sản phẩm -->
+        <!-- sửa sp -->
         <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
@@ -391,7 +399,7 @@ onMounted(() => {
                                 <div class="col-md-12">
                                     <label class="form-label">Mô tả</label>
                                     <textarea v-model="form.description" rows="3"
-                                        class="form-control">Áo thun nam form rộng chất cotton mịn...</textarea>
+                                        class="form-control">Tai nghe chống ồn chính hãng...</textarea>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Ảnh sản phẩm</label>
@@ -415,7 +423,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Modal xác nhận xoá -->
+        <!-- xoá sp -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">

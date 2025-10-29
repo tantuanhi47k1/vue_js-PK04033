@@ -39,7 +39,6 @@ onMounted(() => {
 <template>
     <div v-if="product" class="container py-5">
         <div class="card shadow-lg border-0 rounded-4 p-4">
-            <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold text-dark mb-0">
                     <i class="fa fa-box me-2 text-primary"></i>Chi tiết sản phẩm
@@ -49,9 +48,8 @@ onMounted(() => {
                 </button>
             </div>
 
-            <!-- Nội dung -->
             <div class="row g-4">
-                <!-- Ảnh -->
+                <!-- img -->
                 <div class="col-md-5 text-center">
                     <div class="main-image mb-3">
                         <img :src="product.image?.[0] || 'https://via.placeholder.com/300x300?text=No+Image'"
@@ -64,7 +62,7 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Thông tin -->
+                <!-- thông tni -->
                 <div class="col-md-7">
                     <h4 class="fw-bold mb-3"> {{ product.name }}</h4>
                     <div class="mb-3">

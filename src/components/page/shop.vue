@@ -39,6 +39,7 @@ const selectCategory = (categoryId) => {
   selectedCategoryId.value = categoryId
 }
 
+// lọc và sắp xếp sp
 const filteredAndSortedProducts = computed(() => {
   let tempProducts = [...products.value]
 

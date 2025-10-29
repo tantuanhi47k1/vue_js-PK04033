@@ -11,6 +11,10 @@ const ngrokHeaderConfig = {
     headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
+const selectedOrder = ref(null);
+const showDetail = ref(false);
+
+// tải đh
 const fetchOrders = async () => {
   try {
     const { data } = await axios.get(`${API_URL}/orders`, ngrokHeaderConfig);
@@ -20,6 +24,7 @@ const fetchOrders = async () => {
   }
 };
 
+// update trạng thái đh
 const updateStatus = async (order, newStatus) => {
   try {
     if (newStatus === 'Đã hủy' && order.status !== 'Đã hủy') {
@@ -54,7 +59,6 @@ const updateStatus = async (order, newStatus) => {
   }
 };
 
-
 const getStatusClass = (status) => {
   switch (status) {
     case 'Chờ xử lý': return 'bg-processing';
@@ -63,6 +67,16 @@ const getStatusClass = (status) => {
     case 'Đã hủy': return 'bg-cancelled';
     default: return 'bg-secondary';
   }
+};
+
+const viewDetails = (order) => {
+  selectedOrder.value = order;
+  showDetail.value = true;
+};
+
+const closeDetails = () => {
+  showDetail.value = false;
+  selectedOrder.value = null;
 };
 
 onMounted(fetchOrders);
@@ -93,16 +107,55 @@ onMounted(fetchOrders);
               <td>
                 <span :class="['badge', getStatusClass(order.status)]">{{ order.status }}</span>
               </td>
-              <td>
-                <select class="form-select form-select-sm" @change="updateStatus(order, $event.target.value)">
-                  <option :selected="order.status === status" v-for="status in statuses" :key="status" :value="status">
+              <td class="d-flex gap-2">
+                <select class="form-select form-select-sm w-auto"
+                        @change="updateStatus(order, $event.target.value)">
+                  <option :selected="order.status === status"
+                          v-for="status in statuses"
+                          :key="status"
+                          :value="status">
                     {{ status }}
                   </option>
                 </select>
+                <button class="btn btn-sm btn-outline-primary" @click="viewDetails(order)">
+                  Xem
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <div v-if="showDetail" class="modal-overlay" @click.self="closeDetails">
+      <div class="modal-content">
+        <h5 class="fw-bold mb-3">Chi tiết đơn hàng #{{ selectedOrder.id }}</h5>
+        <p><strong>Khách hàng:</strong> {{ selectedOrder.customerInfo.fullname }}</p>
+        <p><strong>Ngày đặt:</strong> {{ new Date(selectedOrder.orderDate).toLocaleString('vi-VN') }}</p>
+        <p><strong>Trạng thái:</strong> {{ selectedOrder.status }}</p>
+        <p><strong>Tổng tiền:</strong> {{ selectedOrder.total.toLocaleString('vi-VN') }} ₫</p>
+
+        <h6 class="fw-bold mt-3">Danh sách sản phẩm</h6>
+        <table class="table table-sm table-bordered mt-2">
+          <thead>
+            <tr>
+              <th>Tên sản phẩm</th>
+              <th>Số lượng</th>
+              <th>Giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in selectedOrder.products" :key="p.id">
+              <td>{{ p.name }}</td>
+              <td>{{ p.quantity }}</td>
+              <td>{{ p.price.toLocaleString('vi-VN') }} ₫</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="text-end mt-3">
+          <button class="btn btn-secondary" @click="closeDetails">Đóng</button>
+        </div>
       </div>
     </div>
   </div>
@@ -114,4 +167,22 @@ onMounted(fetchOrders);
 .badge.bg-delivered { background-color: #198754; color: white; }
 .badge.bg-cancelled { background-color: #dc3545; color: white; }
 .badge.bg-secondary { background-color: #6c757d; color: white; }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
 </style>

@@ -27,6 +27,7 @@ const ngrokHeaderConfig = {
     headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
+// cấu hình biểu đồ
 const chartOptions = ref({
   responsive: true,
   maintainAspectRatio: false,
@@ -35,7 +36,7 @@ const chartOptions = ref({
     title: { display: true, text: "Thống kê doanh thu theo ngày" },
   },
   layout: {
-    padding: { left: 0, right: 0, top: 10, bottom: 0 }, // sát trái
+    padding: { left: 0, right: 0, top: 10, bottom: 0 },
   },
   scales: {
     y: {
@@ -46,7 +47,7 @@ const chartOptions = ref({
     x: {
       ticks: { font: { size: 12 } },
       grid: { drawBorder: false },
-      offset: false, // bỏ khoảng trống 2 bên
+      offset: false,
     },
   },
 });
@@ -56,7 +57,7 @@ onMounted(async () => {
     const response = await axios.get(`${API_URL}/orders`, ngrokHeaderConfig);
     orders.value = response.data || [];
 
-    // Gom doanh thu theo ngày
+    // lấy toàn bộ dthu theo ngày
     const revenueByDate = {};
     orders.value.forEach((order) => {
       const date = new Date(order.orderDate).toLocaleDateString("vi-VN");
@@ -64,7 +65,7 @@ onMounted(async () => {
         (revenueByDate[date] || 0) + parseFloat(order.total || 0);
     });
 
-    // Gán dữ liệu cho biểu đồ
+    // gán dliệu cho biểu đồ
     chartData.value = {
       labels: Object.keys(revenueByDate),
       datasets: [
@@ -73,10 +74,10 @@ onMounted(async () => {
           data: Object.values(revenueByDate),
           backgroundColor: "rgba(54, 162, 235, 0.8)",
           borderRadius: 6,
-          barThickness: 15, // 👈 cột mảnh hơn
+          barThickness: 15,
           maxBarThickness: 20,
-          categoryPercentage: 0.6, // giảm độ rộng nhóm
-          barPercentage: 0.6, // giảm độ rộng từng cột
+          categoryPercentage: 0.6,
+          barPercentage: 0.6,
         },
       ],
     };
@@ -152,7 +153,6 @@ onMounted(async () => {
   color: #007bff;
 }
 
-/* 👇 Biểu đồ rộng, nhưng cột mảnh và nằm sát trái */
 .chart-wrapper {
   background: #fff;
   border-radius: 12px;
@@ -162,7 +162,7 @@ onMounted(async () => {
   width: 900px;
   margin: 0 auto;
   display: flex;
-  justify-content: flex-start; /* sát trái */
+  justify-content: flex-start;
   align-items: center;
 }
 </style>

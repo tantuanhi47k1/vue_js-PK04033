@@ -13,18 +13,19 @@ const selectedId = ref(null)
 const selectedName = ref("")
 const form = ref({ nameCategory: "", image: "" })
 
+// call api lấy danh mục
 const fetchCategory = async () => {
     try {
         const res = await axios.get(`${API_URL}/categories`, ngrokHeaderConfig);
         category.value = res.data
     } catch (err) {
-        console.error("Fetch posts error:", err)
+        console.error("Lỗi khi tải danh mục", err)
     }
 }
 
 const askDelete = (id, name) => {
-    selectedId.value = id
-    selectedName.value = name
+    selectedId.value = id // call id để xóa
+    selectedName.value = name // hiển thị tên dmuc muốn xóa
 }
 
 const confirmDelete = async () => {
@@ -42,10 +43,11 @@ const confirmDelete = async () => {
             confirmButtonColor: '#000'
         })
     } catch (err) {
-        console.error("Delete category error:", err)
+        console.error("Lỗi xoá danh mục", err)
     }
 }
 
+// up ảnh lên
 const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -57,6 +59,7 @@ const handleImageUpload = (e) => {
     }
 };
 
+// thêm dmuc
 const addCategory = async () => {
     if (form.value.nameCategory === "") {
         Swal.fire({
@@ -93,12 +96,14 @@ const addCategory = async () => {
 
 }
 
+// lấy dl sửa dmuc
 const askEdit = (item) => {
     selectedId.value = item.id
     form.value.nameCategory = item.nameCategory
     form.value.image = item.image
 }
 
+// đổi img khi sửa dmuc
 const handleEditImage = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -110,6 +115,7 @@ const handleEditImage = (e) => {
     }
 }
 
+// lưu dmuc đã sửa
 const editCategory = async () => {
     if (!selectedId.value) return
 
@@ -159,7 +165,6 @@ onMounted(fetchCategory)
         <div class="card shadow-lg rounded-4 p-4">
             <h3 class="text-center mb-4">Quản lý danh mục</h3>
 
-            <!-- Form thêm danh mục -->
             <form @submit.prevent="addCategory">
                 <div class="input-group mb-3">
                     <input v-model="form.nameCategory" type="text" class="form-control"
@@ -169,7 +174,6 @@ onMounted(fetchCategory)
                 </div>
             </form>
 
-            <!-- Bảng danh mục -->
             <table class="table table-hover text-center">
                 <thead class="table-light">
                     <tr>
@@ -209,7 +213,7 @@ onMounted(fetchCategory)
         </div>
     </div>
 
-    <!-- Modal Sửa -->
+    <!-- sửa dmuc -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content rounded-4">
@@ -234,7 +238,7 @@ onMounted(fetchCategory)
         </div>
     </div>
 
-    <!-- Modal Xoá -->
+    <!-- xác nhận xoá -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content rounded-4">

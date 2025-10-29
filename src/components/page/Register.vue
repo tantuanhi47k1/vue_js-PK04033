@@ -91,7 +91,6 @@ const handleSubmit = async () => {
       <h3 class="text-center fw-bold mb-4 text-dark">Đăng Ký</h3>
 
       <form @submit.prevent="handleSubmit">
-        <!-- Full Name -->
         <div class="mb-3">
           <label for="fullname" class="form-label fw-semibold text-dark"
             >Họ Và Tên</label
@@ -106,7 +105,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <!-- Email -->
         <div class="mb-3">
           <label for="email" class="form-label fw-semibold text-dark"
             >Email</label
@@ -121,7 +119,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <!-- Phone -->
         <div class="mb-3">
           <label for="phone" class="form-label fw-semibold text-dark"
             >Điện Thoại</label
@@ -135,7 +132,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <!-- Address -->
         <div class="mb-3">
           <label for="address" class="form-label fw-semibold text-dark"
             >Địa Chỉ</label
@@ -149,7 +145,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <!-- Password -->
         <div class="mb-3">
           <label for="password" class="form-label fw-semibold text-dark"
             >Mật Khẩu</label
@@ -176,7 +171,6 @@ const handleSubmit = async () => {
           />
         </div>
 
-        <!-- Submit -->
         <div class="d-grid">
           <button type="submit" class="btn btn-info fw-semibold py-2">
             Đăng Ký
@@ -184,7 +178,6 @@ const handleSubmit = async () => {
         </div>
       </form>
 
-      <!-- Link to Login -->
       <p class="text-center mt-3 mb-0 text-dark">
         Tôi đã có tài khoản!
         <router-link

@@ -22,18 +22,18 @@ const readadmin = async () => {
         const res = await axios.get(`${API_URL}/user`, ngrokHeaderConfig);
         form.value = res.data;
     } catch (err) {
-        console.log("Fetch posts error:", err);
+        console.log("Lỗi không thể lấy dữ liệu", err);
     }
 };
 
 const handleLogin = () => {
     if (email.value === "") {
-        message.value = "Email cannot be blank";
+        message.value = "Không được để trống email";
         isSuccess.value = false;
         return;
     }
     if (password.value === "") {
-        message.value = "Password cannot be blank";
+        message.value = "Mật khẩu không được để trống";
         isSuccess.value = false;
         return;
     }
@@ -71,14 +71,12 @@ onMounted(readadmin);
         <div class="card shadow-lg p-4 rounded-4" style="max-width: 400px; width: 100%;">
             <h3 class="text-center mb-4">Đăng Nhập</h3>
             <form @submit.prevent="handleLogin">
-                <!-- Email -->
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="email" v-model="email" placeholder="abc@gmail.com"
                         required />
                 </div>
 
-                <!-- Password -->
                 <div class="mb-3">
                     <label for="password" class="form-label">Mật Khẩu</label>
                     <input type="password" class="form-control" id="password" v-model="password"

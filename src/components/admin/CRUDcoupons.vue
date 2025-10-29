@@ -15,11 +15,12 @@ const newCoupon = ref({
   discount: '',
   conditions: '',
   expiry: '',
-  type: 'percent' // chỉ cho phép giảm theo %
+  type: 'percent'
 });
 const editCouponData = ref({});
 const deleteId = ref(null);
 
+// đọc mã giảm giá
 const readCoupon = async () => {
   try {
     const res = await axios.get(`${API_URL}/coupons`, ngrokHeaderConfig);
@@ -29,6 +30,7 @@ const readCoupon = async () => {
   }
 };
 
+// ktra hợp lệ
 const validateCoupon = (coupon) => {
   if (!coupon.code.trim()) return '⚠️ Mã giảm giá không được để trống';
   if (!coupon.title.trim()) return '⚠️ Tiêu đề không được để trống';
@@ -40,6 +42,7 @@ const validateCoupon = (coupon) => {
   return null;
 };
 
+// add mã giảm giá
 const addCoupon = async () => {
   const error = validateCoupon(newCoupon.value);
   if (error) return alert(error);
@@ -59,6 +62,7 @@ const openEditModal = (item) => {
   editCouponData.value = { ...item };
 };
 
+// update mã giảm giá
 const updateCoupon = async () => {
   const error = validateCoupon(editCouponData.value);
   if (error) return alert(error);
@@ -82,6 +86,7 @@ const openDeleteModal = (id) => {
   deleteId.value = id;
 };
 
+// delete mã giảm giá
 const deleteCoupon = async () => {
   try {
     await axios.delete(`${API_URL}/coupons/${deleteId.value}`, ngrokHeaderConfig);
@@ -146,7 +151,7 @@ onMounted(readCoupon);
       </table>
     </div>
 
-    <!-- Modal thêm -->
+    <!-- thêm -->
     <div class="modal fade" id="addCouponModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -191,7 +196,7 @@ onMounted(readCoupon);
       </div>
     </div>
 
-    <!-- Modal sửa -->
+    <!-- sửa -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
@@ -235,7 +240,7 @@ onMounted(readCoupon);
       </div>
     </div>
 
-    <!-- Modal xoá -->
+    <!-- xoá -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">

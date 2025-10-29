@@ -13,6 +13,7 @@ const ngrokHeaderConfig = {
   headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
+// 
 const readUser = async () => {
   try {
     const res = await axios.get(`${API_URL}/user`, ngrokHeaderConfig)
@@ -22,6 +23,7 @@ const readUser = async () => {
   }
 }
 
+// xoá user
 const removeUser = (user) => {
   if (user.role === 'admin') {
     Swal.fire({
@@ -54,12 +56,13 @@ const removeUser = (user) => {
           confirmButtonColor: '#000'
         })
       } catch (err) {
-        console.error("Delete user error:", err)
+        console.error("Lỗi xoá user", err)
       }
     }
   })
 }
 
+// tạo user
 const createUser = async () => {
   if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone ||
       !formUser.value.address || !formUser.value.role || !formUser.value.password) {
@@ -85,7 +88,7 @@ const createUser = async () => {
     })
     resetForm()
   } catch (err) {
-    console.error("Add user error:", err)
+    console.error("Lỗi tạo user", err)
   }
 }
 
@@ -95,6 +98,7 @@ const editUser = (item) => {
   editingId.value = item.id
 }
 
+// update user
 const updateUser = async () => {
   if (!formUser.value.fullname || !formUser.value.email || !formUser.value.phone ||
       !formUser.value.address || !formUser.value.role) {
@@ -111,7 +115,7 @@ const updateUser = async () => {
   try {
     const res = await axios.put(`${API_URL}/user/${editingId.value}`, formUser.value, ngrokHeaderConfig)
     const index = users.value.findIndex(p => p.id === editingId.value)
-    if (index !== -1) users.value[index] = res.data
+    if (index !== -1) users.value[index] = res.data // gán lại dlieu mới đã update
     Swal.fire({
       icon: 'success',
       title: 'Sửa user thành công',
@@ -121,7 +125,7 @@ const updateUser = async () => {
     })
     resetForm()
   } catch (err) {
-    console.error("Update user error:", err)
+    console.error("Lỗi cập nhật user", err)
   }
 }
 

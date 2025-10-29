@@ -265,7 +265,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Modal đánh giá -->
+    <!-- đánh giá -->
     <div v-if="showReviewModal" class="modal-backdrop" @click.self="showReviewModal = false">
       <div class="modal-dialog modal-dialog-centered modal-custom" style="background-color: gray; padding: 10px;">
         <div class="modal-content">

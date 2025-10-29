@@ -25,7 +25,7 @@ const ngrokHeaderConfig = {
   headers: { 'ngrok-skip-browser-warning': 'true' },
 };
 
-// Đánh giá
+// đánh giá
 const fetchReviews = async () => {
   if (!route.params.id) return;
   try {
@@ -46,7 +46,7 @@ const fetchReviews = async () => {
   }
 };
 
-// Bình luận
+// bl
 const fetchApprovedComments = async () => {
   if (!route.params.id) return;
   try {
@@ -111,6 +111,7 @@ const readCategories = async () => {
   }
 };
 
+// sản phẩm liên quan
 const readRelatedProducts = async () => {
   if (!product.value) return;
   try {
@@ -147,10 +148,12 @@ const addToCart = () => {
   }
 };
 
+// ktra sp trong yt
 const isInWishlist = (productId) => {
   return store.getters['wishlist/isInWishlist'](productId);
 }
 
+// thêm or xóa yt
 const toggleWishlist = (product) => {
   if (isInWishlist(product.id)) {
     store.dispatch('wishlist/removeFromWishlist', product.id);

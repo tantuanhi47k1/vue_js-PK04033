@@ -14,10 +14,10 @@ const userInfo = ref({
   phone: "",
   note: "",
 });
-const paymentMethod = ref("cod");
-const couponCode = ref("");
-const discount = ref(0);
-const appliedCoupon = ref(null);
+const paymentMethod = ref("cod"); // mặc định là cod :)
+const couponCode = ref(""); // mã giảm giá ng dung` nhập
+const discount = ref(0); // tiền đc giảm
+const appliedCoupon = ref(null); // mã giảm giá đã áp dụng
 const shippingFee = ref(0);
 
 const cart = computed(() => store.getters["cart/cartItems"]);
@@ -66,6 +66,7 @@ watch(cart, () => {
   appliedCoupon.value = null;
 });
 
+// phí ship
 const updateShippingFee = () => {
   const value = subtotal.value;
   if (value === 0) {
@@ -77,6 +78,7 @@ const updateShippingFee = () => {
   }
 };
 
+//
 const applyCoupon = async () => {
   if (!couponCode.value) {
     Swal.fire("Cảnh báo", "Vui lòng nhập mã giảm giá!", "warning");

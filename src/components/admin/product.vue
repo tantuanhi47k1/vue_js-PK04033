@@ -97,6 +97,17 @@ const addProduct = async () => {
         return
     }
 
+    if (form.value.price < 0 || form.value.discount < 0 || form.value.quantity < 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Giá trị không hợp lệ',
+            text: 'Giá, giảm giá và số lượng không được nhỏ hơn 0.',
+            showConfirmButton: false,
+            timer: 2000
+        })
+        return
+    }
+
     try {
         const res = await axios.post(`${API_URL}/products`, form.value, ngrokHeaderConfig)
         products.value.push(res.data)
@@ -157,9 +168,20 @@ const editProduct = async () => {
         })
         return
     }
+
+    if (form.value.price < 0 || form.value.discount < 0 || form.value.quantity < 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Giá trị không hợp lệ',
+            text: 'Giá, giảm giá và số lượng không được nhỏ hơn 0.',
+            showConfirmButton: false,
+            timer: 2000
+        })
+        return
+    }
+
     try {
         const res = await axios.put(`${API_URL}/products/${selectedId.value}`, form.value, ngrokHeaderConfig)
-
         const index = products.value.findIndex((p) => p.id === selectedId.value)
         if (index !== -1) {
             products.value[index] = res.data
@@ -199,7 +221,6 @@ onMounted(() => {
     readCategory()
     readproduct()
 })
-
 </script>
 
 <template>
@@ -216,67 +237,46 @@ onMounted(() => {
             <table class="table table-bordered table-hover align-middle mb-0">
                 <thead class="table-dark text-center">
                     <tr>
-                        <th style="width: 5%;">#</th>
-                        <th style="width: 12%;">Ảnh</th>
-                        <th style="width: 15%;">Tên sản phẩm</th>
-                        <th style="width: 15%;">Danh mục</th>
-                        <th style="width: 10%;">Giá</th>
-                        <th style="width: 12%;">Giá đã giảm</th>
-                        <th style="width: 8%;">Số lượng</th>
-                        <th style="width: 10%;">Trạng thái</th>
-                        <th style="width: 13%;">Hành động</th>
+                        <th>#</th>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Giá đã giảm</th>
+                        <th>Số lượng</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                    <tr v-if="products.length" v-for="i, index in products" :key="i.id">
+                    <tr v-if="products.length" v-for="(i, index) in products" :key="i.id">
                         <td>{{ index + 1 }}</td>
-                        <td>
-                            <img v-for="(img, idx) in i.image" :key="idx" :src="img" alt="Ảnh" width="50"
-                                class="rounded border" />
-                        </td>
+                        <td><img v-for="(img, idx) in i.image" :key="idx" :src="img" width="50" class="rounded border" /></td>
                         <td>{{ i.name }}</td>
-                        <td>{{category.find(c => c.id === i.categoryId)?.nameCategory || "Không có"}}</td>
+                        <td>{{ category.find(c => c.id === i.categoryId)?.nameCategory || "Không có" }}</td>
                         <td>{{ Number(i.price).toLocaleString('vi-VN') }} ₫</td>
-                        <td>{{ Number(i.discount).toLocaleString('vi-VN') }} đ (-{{ Math.round(100 - (i.discount /
-                            i.price) * 100) }}%)</td>
+                        <td>{{ Number(i.discount).toLocaleString('vi-VN') }} ₫</td>
                         <td>{{ i.quantity }}</td>
                         <td>
-                            <span v-if="i.quantity === 0" class="badge bg-danger">
-                                Hết hàng
-                            </span>
-                            <span v-else-if="i.quantity <= i.lowStockThreshold" class="badge bg-warning text-dark">
-                                Sắp hết hàng
-                            </span>
-                            <span v-else class="badge bg-success">
-                                Còn hàng
-                            </span>
+                            <span v-if="i.quantity === 0" class="badge bg-danger">Hết hàng</span>
+                            <span v-else-if="i.quantity <= i.lowStockThreshold" class="badge bg-warning text-dark">Sắp hết hàng</span>
+                            <span v-else class="badge bg-success">Còn hàng</span>
                         </td>
                         <td>
-                            <router-link :to="`/admin/readProduct/${i.id}`" class="btn btn-outline-info btn-sm me-2">
-                                <i class="fa fa-eye"></i>
-                            </router-link>
-                            <button @click="askEdit(i)" class="btn btn-outline-warning btn-sm me-2"
-                                data-bs-toggle="modal" data-bs-target="#editModal">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                            <button @click="askDelete(i.id, i.name)" class="btn btn-outline-danger btn-sm"
-                                data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="fa fa-trash"></i>
-                            </button>
+                            <router-link :to="`/admin/readProduct/${i.id}`" class="btn btn-outline-info btn-sm me-2"><i class="fa fa-eye"></i></router-link>
+                            <button @click="askEdit(i)" class="btn btn-outline-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editModal"><i class="fa fa-edit"></i></button>
+                            <button @click="askDelete(i.id, i.name)" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>
                     <tr v-else>
-                        <td colspan="8" class="text-center text-muted py-3">
-                            Chưa có sản phẩm nào
-                        </td>
+                        <td colspan="9" class="text-center text-muted py-3">Chưa có sản phẩm nào</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- thêm sp -->
-        <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-4">
                     <div class="modal-header bg-warning text-white">
@@ -288,23 +288,19 @@ onMounted(() => {
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Tên sản phẩm</label>
-                                    <input v-model="form.name" type="text" class="form-control"
-                                        placeholder="Nhập tên sản phẩm" />
+                                    <input v-model="form.name" type="text" class="form-control" placeholder="Nhập tên sản phẩm" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Giá</label>
-                                    <input v-model="form.price" type="number" class="form-control"
-                                        placeholder="Nhập giá" />
+                                    <input v-model="form.price" type="number" min="0" class="form-control" placeholder="Nhập giá" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Giá đã giảm</label>
-                                    <input v-model="form.discount" type="number" class="form-control"
-                                        placeholder="Nhập giá" />
+                                    <input v-model="form.discount" type="number" min="0" class="form-control" placeholder="Nhập giá giảm" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số lượng</label>
-                                    <input v-model="form.quantity" type="number" class="form-control"
-                                        placeholder="Nhập số lượng" />
+                                    <input v-model="form.quantity" type="number" min="0" class="form-control" placeholder="Nhập số lượng" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Trạng thái</label>
@@ -318,15 +314,12 @@ onMounted(() => {
                                     <label class="form-label">Danh mục</label>
                                     <select v-model="form.categoryId" class="form-select">
                                         <option selected>-- Chọn danh mục --</option>
-                                        <option v-for="items in category" :value="items.id" :key="items.id">{{
-                                            items.nameCategory }}
-                                        </option>
+                                        <option v-for="items in category" :value="items.id" :key="items.id">{{ items.nameCategory }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Mô tả</label>
-                                    <textarea v-model="form.description" rows="3" class="form-control"
-                                        placeholder="Nhập mô tả sản phẩm"></textarea>
+                                    <textarea v-model="form.description" rows="3" class="form-control" placeholder="Nhập mô tả sản phẩm"></textarea>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Ảnh sản phẩm</label>
@@ -336,10 +329,8 @@ onMounted(() => {
                         </form>
                     </div>
                     <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Hủy</button>
-                        <button @click="addProduct" data-bs-dismiss="modal" type="button" class="btn btn-success">Lưu
-                            sản
-                            phẩm</button>
+                        <button class="btn btn-danger" data-bs-dismiss="modal">Hủy</button>
+                        <button @click="addProduct" class="btn btn-success" data-bs-dismiss="modal">Lưu sản phẩm</button>
                     </div>
                 </div>
             </div>
@@ -358,26 +349,23 @@ onMounted(() => {
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Tên sản phẩm</label>
-                                    <input v-model="form.name" type="text" class="form-control"
-                                        value="Áo Thun Nam Basic" />
+                                    <input v-model="form.name" type="text" class="form-control" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Giá</label>
-                                    <input v-model="form.price" type="number" class="form-control" value="250000" />
+                                    <input v-model="form.price" type="number" min="0" class="form-control" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Giá đã giảm</label>
-                                    <input v-model="form.discount" type="number" class="form-control" value="250000" />
+                                    <input v-model="form.discount" type="number" min="0" class="form-control" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số lượng</label>
-                                    <input v-model="form.quantity" type="number" class="form-control"
-                                        placeholder="Nhập số lượng" />
+                                    <input v-model="form.quantity" type="number" min="0" class="form-control" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Ngưỡng báo sắp hết hàng</label>
-                                    <input v-model="form.lowStockThreshold" type="number" class="form-control"
-                                        placeholder="VD: 5" />
+                                    <input v-model="form.lowStockThreshold" type="number" min="0" class="form-control" placeholder="VD: 5" />
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Trạng thái</label>
@@ -391,24 +379,18 @@ onMounted(() => {
                                     <label class="form-label">Danh mục</label>
                                     <select v-model="form.categoryId" class="form-select">
                                         <option selected>-- Chọn danh mục --</option>
-                                        <option v-for="items in category" :value="items.id" :key="items.id">{{
-                                            items.nameCategory }}
-                                        </option>
+                                        <option v-for="items in category" :value="items.id" :key="items.id">{{ items.nameCategory }}</option>
                                     </select>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Mô tả</label>
-                                    <textarea v-model="form.description" rows="3"
-                                        class="form-control">Tai nghe chống ồn chính hãng...</textarea>
+                                    <textarea v-model="form.description" rows="3" class="form-control"></textarea>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Ảnh sản phẩm</label>
-
                                     <div class="d-flex flex-wrap gap-2 mb-2">
-                                        <img v-for="(img, idx) in form.image" :key="idx" :src="img" width="70"
-                                            class="rounded border" />
+                                        <img v-for="(img, idx) in form.image" :key="idx" :src="img" width="70" class="rounded border" />
                                     </div>
-
                                     <input multiple @change="handleEditImage" type="file" class="form-control" />
                                 </div>
                             </div>
@@ -416,8 +398,7 @@ onMounted(() => {
                     </div>
                     <div class="modal-footer border-0">
                         <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button @click="editProduct" class="btn btn-warning text-white" data-bs-dismiss="modal">Lưu thay
-                            đổi</button>
+                        <button @click="editProduct" class="btn btn-warning text-white" data-bs-dismiss="modal">Lưu thay đổi</button>
                     </div>
                 </div>
             </div>
@@ -437,7 +418,7 @@ onMounted(() => {
                     </div>
                     <div class="modal-footer border-0 justify-content-center">
                         <button class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
-                        <button @click="confirmDelete" data-bs-dismiss="modal" class="btn btn-danger">Xoá</button>
+                        <button @click="confirmDelete" class="btn btn-danger" data-bs-dismiss="modal">Xoá</button>
                     </div>
                 </div>
             </div>
@@ -448,21 +429,17 @@ onMounted(() => {
 <style scoped>
 h2 {
     color: #222;
-    letter-spacing: 0.5px;
 }
-
 .table-hover tbody tr:hover {
     background-color: #f8f9fa;
     transition: 0.3s;
 }
-
 .modal-content {
     animation: fadeIn 0.3s ease-in-out;
 }
-
 @keyframes fadeIn {
-    from {
-        opacity: 0;
+    from { opacity:
+ 0;
         transform: scale(0.95);
     }
 
